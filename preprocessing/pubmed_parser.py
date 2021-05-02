@@ -51,8 +51,8 @@ class PubMedParser:
         return processed_text
 
     def parse_all_files_from(self, folder_path, combined_file_target_path, logfile_path):
-        assert not os.path.exists(combined_file_target_path, "A file already exists at the target path - delete this "
-                                                               "file first")
+        assert not os.path.exists(combined_file_target_path), "A file already exists at the target path - delete this " \
+                                                              "file first "
         all_pubmed_archives = [f for f in glob.glob(f"{folder_path}/*.xml.gz")]
         for pubmed_archive_file_path in all_pubmed_archives:
             self.parse_pubmed_from(pubmed_archive_file_path, combined_file_target_path)
