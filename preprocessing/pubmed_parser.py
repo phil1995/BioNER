@@ -33,6 +33,8 @@ class PubMedParser:
                 if abstract_text is None:
                     continue
                 abstract_text_str = abstract_text.text
+                if abstract_text_str is None:
+                    continue
                 target_file.write(self.process_abstract_text(abstract_text_str))
                 self._abstract_counter += 1
 
