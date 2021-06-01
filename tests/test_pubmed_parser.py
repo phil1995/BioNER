@@ -1,13 +1,14 @@
 import unittest
 from preprocessing.pubmed_parser import PubMedParser
 import os
+import pathlib
 
 
 class PubMedParserTest(unittest.TestCase):
     def test_parseText(self):
         parser = PubMedParser()
-        parser.parse_pubmed_from("./ressources/pubmed21n0001-small.xml.gz", "testfile.txt")
-        # TODO: Mock Filesystem interaction
+        pubmed_filepath = pathlib.Path(__file__).parent.joinpath("ressources/pubmed21n0001-small.xml.gz")
+        parser.parse_pubmed_from(pubmed_filepath, "testfile.txt")
         with open('testfile.txt', 'r') as file:
             file_content = file.read()
             self.assertEqual(
