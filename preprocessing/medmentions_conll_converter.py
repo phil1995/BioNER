@@ -3,7 +3,7 @@ import argparse
 import pathlib
 from enum import Enum, auto
 
-
+CONVERTED_CORPUS_NAME = "corpus_pubtator_CoNLL.txt"
 class DatasetType(Enum):
     TRAINING = auto()
     VALIDATION = auto()
@@ -20,14 +20,14 @@ def convert_medmentions_dataset_to_conll_format(input_filepath):
     :param input_filepath: Path to the original MedMentions dataset in the PubTator format
     """
     corpus_folder_path = pathlib.Path(input_filepath).parent
-    output_filepath = corpus_folder_path.joinpath("corpus_CoNLL.txt")
+    output_filepath = corpus_folder_path.joinpath(CONVERTED_CORPUS_NAME)
     medmentions = bconv.load(input_filepath, fmt='pubtator')
     with open(output_filepath, 'w', encoding='utf8') as output_file:
         bconv.dump(medmentions, output_file, fmt='conll')
 
 
 def create_conll_training_validation_test_datasets(corpus_folder_path):
-    corpus_conll_filepath = corpus_folder_path.joinpath("corpus_pubtator_CoNLL.txt")
+    corpus_conll_filepath = corpus_folder_path.joinpath(CONVERTED_CORPUS_NAME)
     training_dataset_filepath = corpus_folder_path.joinpath("training_CoNLL.txt")
     validation_dataset_filepath = corpus_folder_path.joinpath("validation_CoNLL.txt")
     test_dataset_filepath = corpus_folder_path.joinpath("test_CoNLL.txt")
