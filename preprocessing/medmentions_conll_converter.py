@@ -87,5 +87,6 @@ if __name__ == '__main__':
                         type=str,
                         help='Path to the original MedMentions dataset in the PubTator format')
     args = parser.parse_args()
+    convert_medmentions_dataset_to_conll_format(input_filepath=args.input_filepath)
     corpus_folder_path = pathlib.Path(args.input_filepath).parent
     create_conll_training_validation_test_datasets(corpus_folder_path=corpus_folder_path)
