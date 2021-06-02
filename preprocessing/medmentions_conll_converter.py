@@ -23,7 +23,7 @@ def convert_medmentions_dataset_to_conll_format(input_filepath):
     output_filepath = corpus_folder_path.joinpath(CONVERTED_CORPUS_NAME)
     medmentions = bconv.load(input_filepath, fmt='pubtator')
     with open(output_filepath, 'w', encoding='utf8') as output_file:
-        bconv.dump(medmentions, output_file, fmt='conll')
+        bconv.dump(medmentions, output_file, fmt='conll', tagset='IOB')
 
 
 def create_conll_training_validation_test_datasets(corpus_folder_path):
