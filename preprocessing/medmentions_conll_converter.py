@@ -4,6 +4,9 @@ import pathlib
 from enum import Enum, auto
 
 CONVERTED_CORPUS_NAME = "corpus_pubtator_CoNLL.txt"
+DOC_START = "-DOCSTART-	0	0	O\n\n"
+
+
 class DatasetType(Enum):
     TRAINING = auto()
     VALIDATION = auto()
@@ -51,10 +54,13 @@ def create_conll_training_validation_test_datasets(corpus_folder_path):
                 current_doc_id = line[index:].rstrip()
                 if current_doc_id in training_ids:
                     current_dataset_type = DatasetType.TRAINING
+                    training_output_file.write(DOC_START)
                 elif current_doc_id in validation_ids:
                     current_dataset_type = DatasetType.VALIDATION
+                    validation_output_file.write(DOC_START)
                 elif current_doc_id in test_ids:
                     current_dataset_type = DatasetType.TEST
+                    test_output_file.write(DOC_START)
                 else:
                     raise RuntimeError(
                         "Document ID: " + current_doc_id + " not found in the training, validation, or test set.")
@@ -64,7 +70,7 @@ def create_conll_training_validation_test_datasets(corpus_folder_path):
                 if current_dataset_type == DatasetType.TRAINING:
                     training_output_file.write(line)
                 elif current_dataset_type == DatasetType.VALIDATION:
-                    validation_output_file.write(line )
+                    validation_output_file.write(line)
                 elif current_dataset_type == DatasetType.TEST:
                     test_output_file.write(line)
                 else:
