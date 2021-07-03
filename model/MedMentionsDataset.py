@@ -28,17 +28,19 @@ class MedMentionsDataset(Dataset):
             current_sentences = []
             for new_doc, doc_rows in it.groupby(rows, MedMentionsDataset.is_a_document_separator):
                 if new_doc:
-                    document = Document(id=current_doc_id, sentences=current_sentences)
-                    documents.append(document)
-                    current_sentences = []
-                    current_doc_id = next(ids)
+                    if current_sentences:
+                        document = Document(id=current_doc_id, sentences=current_sentences)
+                        documents.append(document)
+                        current_sentences = []
+                        current_doc_id = next(ids)
                 else:
                     current_tokens = []
                     for new_sentence, sentence_row in it.groupby(doc_rows, MedMentionsDataset.sentence_separator):
                         if new_sentence:
-                            sentence = Sentence(tokens=current_tokens)
-                            current_sentences.append(sentence)
-                            current_tokens = []
+                            if current_tokens:
+                                sentence = Sentence(tokens=current_tokens)
+                                current_sentences.append(sentence)
+                                current_tokens = []
                         else:
                             for raw_token in sentence_row:
                                 token = self.create_annotated_token_from_row(raw_token)
