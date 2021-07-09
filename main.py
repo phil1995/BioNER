@@ -1,8 +1,9 @@
 import argparse
+import torch
+from model.Annotator import Annotator, TrainingParameters
 
-from model.Annotator import Annotator, TrainingParameters, TestParameters
-from os.path import join
 if __name__ == '__main__':
+    torch.multiprocessing.set_start_method('spawn')
     parser = argparse.ArgumentParser(description='Train Annotator')
     required_named = parser.add_argument_group('required named arguments')
     required_named.add_argument('--embeddings',
@@ -33,6 +34,10 @@ if __name__ == '__main__':
                                 type=int,
                                 help='Maximum training epochs',
                                 required=True)
+    required_named.add_argument('--numWorkers',
+                                type=int,
+                                default=0,
+                                help='Number of workers (defaults to 0)')
     args = parser.parse_args()
 
     parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
@@ -41,5 +46,6 @@ if __name__ == '__main__':
                                     validation_dataset_path=args.validation,
                                     test_dataset_path=args.test,
                                     model_save_path=args.modelOutputFolder,
-                                    max_epochs=args.maxEpochs)
+                                    max_epochs=args.maxEpochs,
+                                    num_workers=args.numWorkers)
     Annotator.train(parameters)

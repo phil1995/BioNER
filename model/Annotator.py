@@ -27,7 +27,7 @@ def collate_batch(batch):
 
 class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
-                 test_dataset_path: str, batch_size: int, model_save_path: str, max_epochs: int):
+                 test_dataset_path: str, batch_size: int, model_save_path: str, max_epochs: int, num_workers: int = 0):
         self.encoder_embeddings_path = encoder_embeddings_path
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
@@ -35,6 +35,7 @@ class TrainingParameters:
         self.batch_size = batch_size
         self.model_save_path = model_save_path
         self.max_epochs = max_epochs
+        self.num_workers = num_workers
 
 
 class TestParameters:
@@ -48,11 +49,13 @@ class Annotator:
 
     @staticmethod
     def train(parameters: TrainingParameters):
-        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs} on {parameters.training_dataset_path}")
+        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs} "
+              f"on {parameters.training_dataset_path}")
         encoder = fasttext.load_model(parameters.encoder_embeddings_path)
 
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
-        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=False, num_workers=0,
+        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=False,
+                                                     num_workers=parameters.num_workers,
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
 
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
@@ -61,7 +64,8 @@ class Annotator:
                                            criterion=nn.CrossEntropyLoss())
 
         validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
-        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=False, num_workers=0,
+        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=False,
+                                                       num_workers=parameters.num_workers,
                                                        batch_size=parameters.batch_size, collate_fn=collate_batch)
         evaluator = Annotator.create_evaluator(model)
         # Run model's validation at the end of each epoch
@@ -91,15 +95,16 @@ class Annotator:
         print("Training done")
         # Test
         Annotator.test(encoder=encoder, test_dataset_path=parameters.test_dataset_path,
-                       best_model_state_path=join(parameters.model_save_path, checkpoint_handler.last_checkpoint))
+                       best_model_state_path=join(parameters.model_save_path, checkpoint_handler.last_checkpoint),
+                       num_workers=parameters.num_workers)
 
     @staticmethod
-    def test(encoder: _FastText, test_dataset_path: str, best_model_state_path: str):
+    def test(encoder: _FastText, test_dataset_path: str, best_model_state_path: str, num_workers: int = 0):
         print(f"Start test on: {test_dataset_path}")
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
         model.load_state_dict(torch.load(best_model_state_path))
         test_dataset = Annotator.load_dataset(path=test_dataset_path, encoder=encoder)
-        test_data_loader = MedMentionsDataLoader(dataset=test_dataset, shuffle=False, num_workers=0,
+        test_data_loader = MedMentionsDataLoader(dataset=test_dataset, shuffle=False, num_workers=num_workers,
                                                  batch_size=1, collate_fn=collate_batch)
         evaluator = Annotator.create_evaluator(model)
         state = evaluator.run(test_data_loader)
