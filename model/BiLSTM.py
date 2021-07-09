@@ -54,6 +54,5 @@ class BiLSTM(Module):
         bi_lstm_out, (h, c) = self.biLSTM(x)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
         tag_space = self.hidden2tag(lstm_out)
-        tag_scores = F.softmax(tag_space, dim=1)
-        permuted_tag_scores = tag_scores.permute(0, 2, 1)
-        return permuted_tag_scores
+        permuted_tag_space = tag_space.permute(0, 2, 1)
+        return permuted_tag_space
