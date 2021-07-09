@@ -52,7 +52,7 @@ class Annotator:
         encoder = fasttext.load_model(parameters.encoder_embeddings_path)
 
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
-        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=False, num_workers=1,
+        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=False, num_workers=0,
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
 
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
@@ -61,7 +61,7 @@ class Annotator:
                                            criterion=nn.CrossEntropyLoss())
 
         validation_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
-        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=False, num_workers=1,
+        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=False, num_workers=0,
                                                        batch_size=parameters.batch_size, collate_fn=collate_batch)
         evaluator = Annotator.create_evaluator(model)
         # Run model's validation at the end of each epoch
@@ -99,7 +99,7 @@ class Annotator:
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
         model.load_state_dict(torch.load(best_model_state_path))
         test_dataset = Annotator.load_dataset(path=test_dataset_path, encoder=encoder)
-        test_data_loader = MedMentionsDataLoader(dataset=test_dataset, shuffle=False, num_workers=1,
+        test_data_loader = MedMentionsDataLoader(dataset=test_dataset, shuffle=False, num_workers=0,
                                                  batch_size=1, collate_fn=collate_batch)
         evaluator = Annotator.create_evaluator(model)
         state = evaluator.run(test_data_loader)
