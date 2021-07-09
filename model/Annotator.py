@@ -48,7 +48,7 @@ class Annotator:
 
     @staticmethod
     def train(parameters: TrainingParameters):
-        print(f"Start training with batch size:{parameters.batch_size}, max.Epochs:{parameters.max_epochs}")
+        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs}")
         encoder = fasttext.load_model(parameters.encoder_embeddings_path)
 
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
@@ -158,5 +158,7 @@ class Annotator:
         :param lstm_layer_size: (DATEXIS: 256)
         :return:
         """
-        return BiLSTM(input_vector_size=input_vector_size, feedforward_layer_size=feedforward_layer_size,
-                      lstm_layer_size=lstm_layer_size)
+        model = BiLSTM(input_vector_size=input_vector_size, feedforward_layer_size=feedforward_layer_size,
+                       lstm_layer_size=lstm_layer_size)
+        model.to(device)
+        return model
