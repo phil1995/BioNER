@@ -60,7 +60,7 @@ class Annotator:
         trainer = Annotator.create_trainer(model=model, optimizer=optim.Adam(model.parameters(), lr=0.001),
                                            criterion=nn.CrossEntropyLoss())
 
-        validation_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
+        validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
         validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=False, num_workers=0,
                                                        batch_size=parameters.batch_size, collate_fn=collate_batch)
         evaluator = Annotator.create_evaluator(model)
