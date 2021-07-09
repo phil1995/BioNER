@@ -119,6 +119,7 @@ class Annotator:
     @staticmethod
     def create_trainer(model, optimizer, criterion):
         def train_step(engine, batch):
+            model.train()
             inputs, labels = batch
             # After each iteration of the training step, reset the local gradients stored in the network to zero.
             model.zero_grad()
