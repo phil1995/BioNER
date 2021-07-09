@@ -48,7 +48,7 @@ class Annotator:
 
     @staticmethod
     def train(parameters: TrainingParameters):
-        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs}")
+        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs} on {parameters.training_dataset_path}")
         encoder = fasttext.load_model(parameters.encoder_embeddings_path)
 
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
@@ -95,7 +95,7 @@ class Annotator:
 
     @staticmethod
     def test(encoder: _FastText, test_dataset_path: str, best_model_state_path: str):
-        print("Start test")
+        print(f"Start test on: {test_dataset_path}")
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
         model.load_state_dict(torch.load(best_model_state_path))
         test_dataset = Annotator.load_dataset(path=test_dataset_path, encoder=encoder)
