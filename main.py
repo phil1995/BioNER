@@ -29,6 +29,10 @@ if __name__ == '__main__':
                                 type=str,
                                 help='The folder where the best model should be saved',
                                 required=True)
+    required_named.add_argument('--maxEpochs',
+                                type=int,
+                                help='Maximum training epochs',
+                                required=True)
     args = parser.parse_args()
 
     parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
@@ -36,5 +40,6 @@ if __name__ == '__main__':
                                     training_dataset_path=args.training,
                                     validation_dataset_path=args.validation,
                                     test_dataset_path=args.test,
-                                    model_save_path=args.modelOutputFolder)
+                                    model_save_path=args.modelOutputFolder,
+                                    max_epochs=args.maxEpochs)
     Annotator.train(parameters)

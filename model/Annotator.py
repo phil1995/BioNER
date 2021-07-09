@@ -27,13 +27,14 @@ def collate_batch(batch):
 
 class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
-                 test_dataset_path: str, batch_size: int, model_save_path: str):
+                 test_dataset_path: str, batch_size: int, model_save_path: str, max_epochs: int):
         self.encoder_embeddings_path = encoder_embeddings_path
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
         self.test_dataset_path = test_dataset_path
         self.batch_size = batch_size
         self.model_save_path = model_save_path
+        self.max_epochs = max_epochs
 
 
 class TestParameters:
@@ -47,6 +48,7 @@ class Annotator:
 
     @staticmethod
     def train(parameters: TrainingParameters):
+        print(f"Start training with batch size:{parameters.batch_size}, max.Epochs:{parameters.max_epochs}")
         encoder = fasttext.load_model(parameters.encoder_embeddings_path)
 
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
@@ -84,7 +86,7 @@ class Annotator:
         # Progressbar
         ProgressBar(persist=True).attach(trainer)
         # Start the training
-        trainer.run(training_data_loader, max_epochs=1)
+        trainer.run(training_data_loader, max_epochs=parameters.max_epochs)
 
         print("Training done")
         # Test
