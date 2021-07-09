@@ -109,11 +109,11 @@ class Annotator:
     def create_evaluator(model):
         precision = Precision(average=False)
         recall = Recall(average=False)
-        F1 = (precision * recall * 2 / (precision + recall)).mean()
-
+        f1 = (precision * recall * 2 / (precision + recall + 1e-20)).mean()
         evaluator = create_supervised_evaluator(model, metrics={"Precision": Precision(average=True),
                                                                 "Recall": Recall(average=True),
-                                                                "F1": F1})
+                                                                "F1": f1})
+
         return evaluator
 
     @staticmethod
