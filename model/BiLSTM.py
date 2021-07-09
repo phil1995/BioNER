@@ -16,7 +16,7 @@ class BiLSTM(Module):
         super().__init__()
 
         print(
-            f"Initialize BiLSTM Network: Input Vector Size:{input_vector_size} Feedforward Layer Size: {feedforward_layer_size} LSTM Layer Size: {lstm_layer_size} Out Feature Size: {out_features}")
+            f"Initialize BiLSTM Network: Input Vector Size:{input_vector_size} Feedforward Layer Size:{feedforward_layer_size} LSTM Layer Size:{lstm_layer_size} Out Feature Size:{out_features}")
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
         self.ff2 = Linear(in_features=feedforward_layer_size, out_features=feedforward_layer_size)
         self.biLSTM = LSTM(input_size=feedforward_layer_size,
