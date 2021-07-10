@@ -6,7 +6,7 @@ from torch import optim, nn
 
 from model.BiLSTM import BiLSTM
 from model.MedMentionsDataLoader import MedMentionsDataLoader
-from model.MedMentionsDataset import MedMentionsDataset, MedMentionsStructuredDataset
+from model.MedMentionsDataset import MedMentionsDataset
 from ignite.engine import Engine, Events, create_supervised_evaluator
 from ignite.metrics import Precision, Recall, ConfusionMatrix
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
@@ -54,7 +54,7 @@ class Annotator:
         encoder = fasttext.load_model(parameters.encoder_embeddings_path)
 
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
-        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=False,
+        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=True,
                                                      num_workers=parameters.num_workers,
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
 
@@ -64,7 +64,7 @@ class Annotator:
                                            criterion=nn.CrossEntropyLoss())
 
         validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
-        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=False,
+        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=True,
                                                        num_workers=parameters.num_workers,
                                                        batch_size=parameters.batch_size, collate_fn=collate_batch)
         evaluator = Annotator.create_evaluator(model)
@@ -163,8 +163,8 @@ class Annotator:
 
     @staticmethod
     def load_dataset(path, encoder) -> MedMentionsDataset:
-        structured_dataset = MedMentionsStructuredDataset(path, encoder=encoder)
-        return MedMentionsDataset(structured_dataset)
+        structured_dataset = MedMentionsDataset(path, encoder=encoder)
+        return structured_dataset
 
     @staticmethod
     def create_model(input_vector_size: int, feedforward_layer_size: int = 512, lstm_layer_size: int = 256) -> BiLSTM:
