@@ -8,7 +8,7 @@ from model.BiLSTM import BiLSTM
 from model.MedMentionsDataLoader import MedMentionsDataLoader
 from model.MedMentionsDataset import MedMentionsDataset, MedMentionsStructuredDataset
 from ignite.engine import Engine, Events, create_supervised_evaluator
-from ignite.metrics import Precision, Recall
+from ignite.metrics import Precision, Recall, ConfusionMatrix
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
 from os.path import join
 
@@ -88,7 +88,7 @@ class Annotator:
         evaluator.add_event_handler(Events.COMPLETED, checkpoint_handler)
 
         # Progressbar
-        ProgressBar(persist=True).attach(trainer)
+        ProgressBar().attach(trainer)
         # Start the training
         trainer.run(training_data_loader, max_epochs=parameters.max_epochs)
 
@@ -112,14 +112,23 @@ class Annotator:
 
     @staticmethod
     def create_evaluator(model):
+        precision = Precision(average=True)
+        recall = Recall(average=True)
+        f1 = Annotator.create_f1_score()
+        confusion_matrix = ConfusionMatrix(num_classes=3)
+        evaluator = create_supervised_evaluator(model, metrics={"Precision": precision,
+                                                                "Recall": recall,
+                                                                "F1": f1,
+                                                                "confusion_matrix": confusion_matrix})
+
+        return evaluator
+
+    @staticmethod
+    def create_f1_score():
         precision = Precision(average=False)
         recall = Recall(average=False)
         f1 = (precision * recall * 2 / (precision + recall + 1e-20)).mean()
-        evaluator = create_supervised_evaluator(model, metrics={"Precision": Precision(average=True),
-                                                                "Recall": Recall(average=True),
-                                                                "F1": f1})
-
-        return evaluator
+        return f1
 
     @staticmethod
     def create_trainer(model, optimizer, criterion):
@@ -144,7 +153,9 @@ class Annotator:
     def validation(trainer, evaluator, validation_data_loader):
         state = evaluator.run(validation_data_loader)
         # print computed metrics
-        print("Validation - Epoch:", trainer.state.epoch, state.metrics)
+        print(
+            f"Validation - Epoch:{trainer.state.epoch} | Precision:{state.metrics['Precision']},"
+            f" Recall:{state.metrics['Recall']}, F1:{state.metrics['F1']}")
 
     @staticmethod
     def score_function(engine):
