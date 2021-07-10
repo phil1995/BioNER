@@ -48,6 +48,8 @@ class MedMentionsStructuredDataset:
                                 token = self.create_annotated_token_from_row(raw_token)
                                 encoded_token = self.create_encoded_token_from_token(token)
                                 current_tokens.append(encoded_token)
+                    sentence = Sentence(tokens=current_tokens)
+                    current_sentences.append(sentence)
             document = Document(id=current_doc_id, sentences=current_sentences)
             documents.append(document)
         return documents
@@ -104,7 +106,6 @@ class MedMentionsDataset(Dataset):
                 tags.append(BIO2Tag.get_index(token.tag))
             rows.append([encodings, tags])
         return rows
-
 
     def __len__(self):
         return len(self.data)
