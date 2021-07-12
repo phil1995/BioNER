@@ -4,7 +4,7 @@ from model.BIO2Tag import BIO2Tag
 
 
 class Token:
-    def __init__(self, text: str, start: int, end: int, tag: Optional[BIO2Tag]):
+    def __init__(self, text: str, start: str, end: str, tag: Optional[BIO2Tag]):
         self.text = text
         self.start = start
         self.end = end
@@ -12,3 +12,9 @@ class Token:
 
     def __str__(self):
         return f"{self.text} - start: {self.start} - end: {self.end} - tag: {self.tag.name}"
+
+    def __eq__(self, other):
+        if isinstance(other, Token):
+            result = self.text == other.text and self.start == other.start and self.end == other.end and self.tag == other.tag
+            return result
+        return False

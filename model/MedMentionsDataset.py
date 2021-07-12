@@ -56,10 +56,12 @@ class MedMentionsDataset(Dataset):
                         else:
                             for raw_token in sentence_row:
                                 token = self.create_annotated_token_from_row(raw_token)
-                                encoded_token = self.create_encoded_token_from_token(token, encoder=encoder)
-                                current_tokens.append(encoded_token)
-                    sentence = Sentence(tokens=current_tokens)
-                    current_sentences.append(sentence)
+                                if encoder:
+                                    token = self.create_encoded_token_from_token(token, encoder=encoder)
+                                current_tokens.append(token)
+                    if current_tokens:
+                        sentence = Sentence(tokens=current_tokens)
+                        current_sentences.append(sentence)
             document = Document(id=current_doc_id, sentences=current_sentences)
             documents.append(document)
         return documents
