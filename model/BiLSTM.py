@@ -45,8 +45,6 @@ class BiLSTM(Module):
         init.normal_(tensor.weight, std=math.sqrt(2.0 / tensor.in_features))
 
     def forward(self, x):
-        sentence_length = len(x)
-        # TODO: maybe add here the fasttext encoding?
         x = self.ff1(x)
         x = F.relu(x)
         x = self.ff2(x)
@@ -54,5 +52,7 @@ class BiLSTM(Module):
         bi_lstm_out, (h, c) = self.biLSTM(x)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
         tag_space = self.hidden2tag(lstm_out)
+        # Permute the tag space as CrossEntropyLoss expects an output shape of: [batch_size, nb_classes, seq_length]
+        # see: https://discuss.pytorch.org/t/loss-function-and-lstm-dimension-issues/79291
         permuted_tag_space = tag_space.permute(0, 2, 1)
         return permuted_tag_space
