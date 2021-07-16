@@ -2,44 +2,45 @@ import pytest
 import torch
 
 from model.BIO2Tag import BIO2Tag
-from model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision
+from model.metrics.EntityLevelPrecisionRecall import EntityLevelRecall
 from entity_level_test_utils import transform_tag_to_prob, transform_tag_to_index
 
 
 def test_multiclass_input():
-    pr = EntityLevelPrecision()
-    assert pr._updated is False
+    recall = EntityLevelRecall()
+    assert recall._updated is False
 
     def _test(y_pred, y, batch_size, expected_precision):
-        pr.reset()
-        assert pr._updated is False
+        recall.reset()
+        assert recall._updated is False
 
         if batch_size > 1:
             n_iters = y.shape[0] // batch_size + 1
             for i in range(n_iters):
                 idx = i * batch_size
-                pr.update((y_pred[idx: idx + batch_size], y[idx: idx + batch_size]))
+                recall.update((y_pred[idx: idx + batch_size], y[idx: idx + batch_size]))
         else:
-            pr.update((y_pred, y))
+            recall.update((y_pred, y))
 
-        assert pr._type == "multiclass"
-        assert pr._updated is True
-        assert isinstance(pr.compute(), torch.Tensor)
-        assert expected_precision == pytest.approx(pr.compute())
+        assert recall._type == "multiclass"
+        assert recall._updated is True
+        assert isinstance(recall.compute(), torch.Tensor)
+        assert expected_precision == pytest.approx(recall.compute())
+
 
     def get_test_cases():
 
         test_cases = [
-            # TP= 1; TP+FP = 2
+            # TP= 1; TP+FN = 3
             (
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.OUTSIDE],
                 1,
-                0.5
+                1/3
             ),
             # Predicted Inside without leading Begin
             # Treat the Inside tag without leading Begin as an Begin TODO: is this really correct?
-            # TP=3; TP+FP = 3
+            # TP=2; TP+FN = 3
             (
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
                 [BIO2Tag.INSIDE, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
@@ -47,7 +48,7 @@ def test_multiclass_input():
                 3/3
             ),
             # Predicted all outside
-            # TP= 0; TP+FP = 0
+            # TP= 0; TP+FN = 3
             (
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
                 [BIO2Tag.OUTSIDE, BIO2Tag.OUTSIDE, BIO2Tag.OUTSIDE, BIO2Tag.OUTSIDE, BIO2Tag.OUTSIDE],
@@ -55,12 +56,12 @@ def test_multiclass_input():
                 0
             ),
             # Multiple batches
-            # TP= 1; TP+FP = 2
+            # TP= 1; TP+FN = 3
             (
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.OUTSIDE],
                 2,
-                0.5
+                1/3
             ),
         ]
 
