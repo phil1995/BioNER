@@ -1,16 +1,18 @@
-import torch
+from os.path import join
+
 import fasttext
+import torch
 from fasttext.FastText import _FastText
-from ignite.contrib.handlers import ProgressBar
+from ignite.engine import Engine, Events, create_supervised_evaluator
+from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
+from ignite.metrics import Precision, Recall, ConfusionMatrix
+from ignite.utils import setup_logger
 from torch import optim, nn
 
 from model.BiLSTM import BiLSTM
 from model.MedMentionsDataLoader import MedMentionsDataLoader
 from model.MedMentionsDataset import MedMentionsDataset
-from ignite.engine import Engine, Events, create_supervised_evaluator
-from ignite.metrics import Precision, Recall, ConfusionMatrix
-from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
-from os.path import join
+from model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -87,8 +89,10 @@ class Annotator:
         )
         evaluator.add_event_handler(Events.COMPLETED, checkpoint_handler)
 
-        # Progressbar
-        ProgressBar().attach(trainer)
+        # Add Logger
+        trainer.logger = setup_logger("trainer")
+        evaluator.logger = setup_logger("evaluator")
+
         # Start the training
         trainer.run(training_data_loader, max_epochs=parameters.max_epochs)
 
@@ -112,9 +116,9 @@ class Annotator:
 
     @staticmethod
     def create_evaluator(model):
-        precision = Precision(average=True)
-        recall = Recall(average=True)
-        f1 = Annotator.create_f1_score()
+        precision = EntityLevelPrecision()
+        recall = EntityLevelRecall()
+        f1 = (precision * recall * 2 / (precision + recall + 1e-20)).mean()
         confusion_matrix = ConfusionMatrix(num_classes=3)
         evaluator = create_supervised_evaluator(model, metrics={"Precision": precision,
                                                                 "Recall": recall,
@@ -179,3 +183,4 @@ class Annotator:
                        lstm_layer_size=lstm_layer_size)
         model.to(device)
         return model
+
