@@ -1,4 +1,5 @@
 from os.path import join
+from typing import Optional
 
 import fasttext
 import torch
@@ -29,7 +30,8 @@ def collate_batch(batch):
 
 class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
-                 test_dataset_path: str, batch_size: int, model_save_path: str, max_epochs: int, num_workers: int = 0):
+                 batch_size: int, model_save_path: str, max_epochs: int, num_workers: int = 0,
+                 test_dataset_path: Optional[str] = None):
         self.encoder_embeddings_path = encoder_embeddings_path
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
@@ -97,10 +99,12 @@ class Annotator:
         trainer.run(training_data_loader, max_epochs=parameters.max_epochs)
 
         print("Training done")
+
         # Test
-        Annotator.test(encoder=encoder, test_dataset_path=parameters.test_dataset_path,
-                       best_model_state_path=join(parameters.model_save_path, checkpoint_handler.last_checkpoint),
-                       num_workers=parameters.num_workers)
+        if parameters.test_dataset_path is not None:
+            Annotator.test(encoder=encoder, test_dataset_path=parameters.test_dataset_path,
+                           best_model_state_path=join(parameters.model_save_path, checkpoint_handler.last_checkpoint),
+                           num_workers=parameters.num_workers)
 
     @staticmethod
     def test(encoder: _FastText, test_dataset_path: str, best_model_state_path: str, num_workers: int = 0):
@@ -183,4 +187,3 @@ class Annotator:
                        lstm_layer_size=lstm_layer_size)
         model.to(device)
         return model
-

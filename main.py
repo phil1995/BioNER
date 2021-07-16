@@ -21,7 +21,7 @@ if __name__ == '__main__':
     required_named.add_argument('--test',
                                 type=str,
                                 help='Path to the test dataset file',
-                                required=True)
+                                required=False)
     required_named.add_argument('--batchSize',
                                 type=int,
                                 help='Batch size',
@@ -49,3 +49,5 @@ if __name__ == '__main__':
                                     max_epochs=args.maxEpochs,
                                     num_workers=args.numWorkers)
     Annotator.train(parameters)
+
+
