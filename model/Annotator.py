@@ -1,12 +1,14 @@
+import logging
 from os.path import join
 from typing import Optional
 
 import fasttext
 import torch
 from fasttext.FastText import _FastText
-from ignite.engine import Engine, Events, create_supervised_evaluator
+from ignite.contrib.handlers import TensorboardLogger
+from ignite.engine import Engine, Events, create_supervised_evaluator, create_supervised_trainer, State
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
-from ignite.metrics import Precision, Recall, ConfusionMatrix
+from ignite.metrics import ConfusionMatrix, Loss
 from ignite.utils import setup_logger
 from torch import optim, nn
 
@@ -31,7 +33,8 @@ def collate_batch(batch):
 class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
                  batch_size: int, model_save_path: str, max_epochs: int, num_workers: int = 0,
-                 test_dataset_path: Optional[str] = None):
+                 test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
+                 training_log_file_path: Optional[str] = None):
         self.encoder_embeddings_path = encoder_embeddings_path
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
@@ -40,6 +43,8 @@ class TrainingParameters:
         self.model_save_path = model_save_path
         self.max_epochs = max_epochs
         self.num_workers = num_workers
+        self.tensorboard_log_directory_path = tensorboard_log_directory_path
+        self.training_log_file_path = training_log_file_path
 
 
 class TestParameters:
@@ -63,22 +68,37 @@ class Annotator:
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
 
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-        trainer = Annotator.create_trainer(model=model, optimizer=optim.Adam(model.parameters(), lr=0.001),
-                                           criterion=nn.CrossEntropyLoss())
+        criterion = nn.CrossEntropyLoss()
+        trainer = create_supervised_trainer(model, optimizer, criterion, device=device)
 
         validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
         validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=True,
                                                        num_workers=parameters.num_workers,
                                                        batch_size=parameters.batch_size, collate_fn=collate_batch)
-        evaluator = Annotator.create_evaluator(model)
-        # Run model's validation at the end of each epoch
-        trainer.add_event_handler(Events.EPOCH_COMPLETED, Annotator.validation, trainer, evaluator,
-                                  validation_data_loader)
+        precision = EntityLevelPrecision()
+        recall = EntityLevelRecall()
+        metrics = {"Precision": precision, "Recall": recall,
+                   "F1": (precision * recall * 2 / (precision + recall + 1e-20)).mean(), "loss": Loss(criterion)}
 
-        handler = EarlyStopping(patience=10, score_function=Annotator.score_function, trainer=trainer)
+        train_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
+        validation_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
+
+        @trainer.on(Events.EPOCH_COMPLETED)
+        def compute_metrics(engine):
+            # Evaluate after each training epoch on training and validation dataset
+            Annotator.log_results(epoch=engine.state.epoch,
+                                  state=train_evaluator.run(training_data_loader),
+                                  logger=train_evaluator.logger)
+            Annotator.log_results(epoch=engine.state.epoch,
+                                  state=validation_evaluator.run(validation_data_loader),
+                                  logger=validation_evaluator.logger)
+
+        # Early stopping
         # Note: the handler is attached to an *Evaluator* (runs one epoch on validation dataset).
-        evaluator.add_event_handler(Events.COMPLETED, handler)
+        handler = EarlyStopping(patience=10, score_function=Annotator.score_function, trainer=trainer)
+        validation_evaluator.add_event_handler(Events.COMPLETED, handler)
 
         # Attach the checkpoint_handler to an evaluator to save best model during the training according to computed
         # validation metric
@@ -89,16 +109,26 @@ class Annotator:
             score_function=Annotator.score_function, score_name="val_f1",
             global_step_transform=global_step_from_engine(trainer)
         )
-        evaluator.add_event_handler(Events.COMPLETED, checkpoint_handler)
+        validation_evaluator.add_event_handler(Events.COMPLETED, checkpoint_handler)
 
         # Add Logger
-        trainer.logger = setup_logger("trainer")
-        evaluator.logger = setup_logger("evaluator")
+        trainer.logger = setup_logger("Trainer", filepath=parameters.training_log_file_path)
+        train_evaluator.logger = setup_logger("Train Evaluator", filepath=parameters.training_log_file_path)
+        validation_evaluator.logger = setup_logger("Validation Evaluator", filepath=parameters.training_log_file_path)
+
+        # Add Tensorboard Logger
+        if parameters.tensorboard_log_directory_path is not None:
+            tb_logger = Annotator.add_tensorboard_logger(log_dir=parameters.tensorboard_log_directory_path,
+                                                         trainer=trainer,
+                                                         train_evaluator=train_evaluator,
+                                                         validation_evaluator=validation_evaluator)
 
         # Start the training
         trainer.run(training_data_loader, max_epochs=parameters.max_epochs)
 
-        print("Training done")
+        # Close Tensorboard Logger (if available)
+        if tb_logger is not None:
+            tb_logger.close()
 
         # Test
         if parameters.test_dataset_path is not None:
@@ -132,38 +162,9 @@ class Annotator:
         return evaluator
 
     @staticmethod
-    def create_f1_score():
-        precision = Precision(average=False)
-        recall = Recall(average=False)
-        f1 = (precision * recall * 2 / (precision + recall + 1e-20)).mean()
-        return f1
-
-    @staticmethod
-    def create_trainer(model, optimizer, criterion):
-        def train_step(engine, batch):
-            model.train()
-            inputs, labels = batch
-            # After each iteration of the training step, reset the local gradients stored in the network to zero.
-            model.zero_grad()
-
-            outputs = model(inputs)
-            batch_loss = criterion(outputs, labels)
-            batch_loss.backward()
-            optimizer.step()
-            return {'loss': batch_loss.item(),
-                    'y_pred': outputs,
-                    'y': labels}
-
-        trainer = Engine(train_step)
-        return trainer
-
-    @staticmethod
-    def validation(trainer, evaluator, validation_data_loader):
-        state = evaluator.run(validation_data_loader)
-        # print computed metrics
-        print(
-            f"Validation - Epoch:{trainer.state.epoch} | Precision:{state.metrics['Precision']},"
-            f" Recall:{state.metrics['Recall']}, F1:{state.metrics['F1']}")
+    def log_results(epoch: int, state: State, logger: logging.Logger):
+        logger.info(f"Training-Epoch:{epoch} | Evaluation Results | Precision:{state.metrics['Precision']},"
+                    f" Recall:{state.metrics['Recall']}, F1:{state.metrics['F1']}")
 
     @staticmethod
     def score_function(engine):
@@ -187,3 +188,17 @@ class Annotator:
                        lstm_layer_size=lstm_layer_size)
         model.to(device)
         return model
+
+    @staticmethod
+    def add_tensorboard_logger(log_dir: str, trainer: Engine, train_evaluator: Engine,
+                               validation_evaluator: Engine) -> TensorboardLogger:
+        tb_logger = TensorboardLogger(log_dir=log_dir)
+        for tag, engine in [("training", train_evaluator), ("validation", validation_evaluator)]:
+            tb_logger.attach_output_handler(
+                engine=engine,
+                event_name=Events.EPOCH_COMPLETED,
+                tag=tag,
+                metric_names="all",
+                global_step_transform=global_step_from_engine(trainer),
+            )
+        return tb_logger

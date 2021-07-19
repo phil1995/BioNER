@@ -38,6 +38,14 @@ if __name__ == '__main__':
                                 type=int,
                                 default=0,
                                 help='Number of workers (defaults to 0)')
+    required_named.add_argument('--tensorboardLogDirectory',
+                                type=str,
+                                help='The directory where to log the tensorboard data',
+                                required=False)
+    required_named.add_argument('--trainingsLogFile',
+                                type=str,
+                                help='The file path where to log the PyTorch Ignite training and validation',
+                                required=False)
     args = parser.parse_args()
 
     parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
@@ -47,7 +55,9 @@ if __name__ == '__main__':
                                     test_dataset_path=args.test,
                                     model_save_path=args.modelOutputFolder,
                                     max_epochs=args.maxEpochs,
-                                    num_workers=args.numWorkers)
+                                    num_workers=args.numWorkers,
+                                    tensorboard_log_directory_path=args.tensorboardLogDirectory,
+                                    training_log_file_path=args.trainingsLogFile)
     Annotator.train(parameters)
 
 
