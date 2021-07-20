@@ -117,6 +117,7 @@ class Annotator:
         validation_evaluator.logger = setup_logger("Validation Evaluator", filepath=parameters.training_log_file_path)
 
         # Add Tensorboard Logger
+        tb_logger = None
         if parameters.tensorboard_log_directory_path is not None:
             tb_logger = Annotator.add_tensorboard_logger(log_dir=parameters.tensorboard_log_directory_path,
                                                          trainer=trainer,
