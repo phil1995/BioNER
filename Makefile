@@ -19,103 +19,145 @@ mkfile_dir := $(dir $(mkfile_path))
 
 main_path := $(mkfile_dir)main.py
 
+# Create Model output subdirectories
+setup:
+	mkdir $(model_output_directory)3-3ngrams \
+	$(model_output_directory)3-4ngrams \
+	$(model_output_directory)3-5ngrams \
+	$(model_output_directory)3-6ngrams \
+	$(model_output_directory)4-4ngrams \
+	$(model_output_directory)4-5ngrams \
+	$(model_output_directory)4-6ngrams \
+	$(model_output_directory)5-5ngrams \
+	$(model_output_directory)5-6ngrams \
+	$(model_output_directory)6-6ngrams \
+	$(model_output_directory)3-3ngrams/tensorboard_logs \
+	$(model_output_directory)3-4ngrams/tensorboard_logs \
+	$(model_output_directory)3-5ngrams/tensorboard_logs \
+	$(model_output_directory)3-6ngrams/tensorboard_logs \
+	$(model_output_directory)4-4ngrams/tensorboard_logs \
+	$(model_output_directory)4-5ngrams/tensorboard_logs \
+	$(model_output_directory)4-6ngrams/tensorboard_logs \
+	$(model_output_directory)5-5ngrams/tensorboard_logs \
+	$(model_output_directory)5-6ngrams/tensorboard_logs \
+	$(model_output_directory)6-6ngrams/tensorboard_logs \
 
 train-3-3:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-3ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-3ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-3ngrams/
+	--modelOutputFolder $(model_output_directory)3-3ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)3-3ngrams/tensorboard_logs
 
 train-3-4:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-4ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-4ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-4ngrams/
+	--modelOutputFolder $(model_output_directory)3-4ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)3-4ngrams/tensorboard_logs
 
 train-3-5:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-5ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-5ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-5ngrams/
+	--modelOutputFolder $(model_output_directory)3-5ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)3-5ngrams/tensorboard_logs
 
 train-3-6:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-6ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-6ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-6ngrams/
+	--modelOutputFolder $(model_output_directory)3-6ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)3-6ngrams/tensorboard_logs
 
 train-4-4:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-4ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-4ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)4-4ngrams/
+	--modelOutputFolder $(model_output_directory)4-4ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)4-4ngrams/tensorboard_logs
 
 train-4-5:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-5ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-5ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)4-5ngrams/
+	--modelOutputFolder $(model_output_directory)4-5ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log
+	--tensorboardLogDirectory $(model_output_directory)4-5ngrams/tensorboard_logs
 
 train-4-6:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-6ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-6ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)4-6ngrams/
+	--modelOutputFolder $(model_output_directory)4-6ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)4-6ngrams/tensorboard_logs
 
 train-5-5:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.5-5ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.5-5ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)5-5ngrams/
+	--modelOutputFolder $(model_output_directory)5-5ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)5-5ngrams/tensorboard_logs
 
 train-5-6:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.5-6ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.5-6ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)5-6ngrams/
+	--modelOutputFolder $(model_output_directory)5-6ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)5-6ngrams/tensorboard_logs
 
 train-6-6:
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.6-6ngrams.neg5.1e-5_subs.bin \ 
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.6-6ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)6-6ngrams/
+	--modelOutputFolder $(model_output_directory)6-6ngrams/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers)
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)training.log \
+	--tensorboardLogDirectory $(model_output_directory)6-6ngrams/tensorboard_logs
