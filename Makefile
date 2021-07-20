@@ -51,7 +51,7 @@ train-3-3:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)3-3ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)3-3ngrams/tensorboard_logs
 
 train-3-4:
@@ -63,7 +63,7 @@ train-3-4:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)3-4ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)3-4ngrams/tensorboard_logs
 
 train-3-5:
@@ -75,7 +75,7 @@ train-3-5:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)3-5ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)3-5ngrams/tensorboard_logs
 
 train-3-6:
@@ -87,7 +87,7 @@ train-3-6:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)3-6ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)3-6ngrams/tensorboard_logs
 
 train-4-4:
@@ -99,7 +99,7 @@ train-4-4:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)4-4ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)4-4ngrams/tensorboard_logs
 
 train-4-5:
@@ -111,7 +111,7 @@ train-4-5:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log
+	--trainingsLogFile $(model_output_directory)4-5ngrams/training.log
 	--tensorboardLogDirectory $(model_output_directory)4-5ngrams/tensorboard_logs
 
 train-4-6:
@@ -123,7 +123,7 @@ train-4-6:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)4-6ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)4-6ngrams/tensorboard_logs
 
 train-5-5:
@@ -135,7 +135,7 @@ train-5-5:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)5-5ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)5-5ngrams/tensorboard_logs
 
 train-5-6:
@@ -147,7 +147,7 @@ train-5-6:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)5-6ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)5-6ngrams/tensorboard_logs
 
 train-6-6:
@@ -159,5 +159,5 @@ train-6-6:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)training.log \
+	--trainingsLogFile $(model_output_directory)6-6ngrams/training.log \
 	--tensorboardLogDirectory $(model_output_directory)6-6ngrams/tensorboard_logs
