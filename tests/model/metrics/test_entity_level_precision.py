@@ -3,7 +3,7 @@ import torch
 
 from model.BIO2Tag import BIO2Tag
 from model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision
-from entity_level_test_utils import transform_tag_to_prob, transform_tag_to_index
+from entity_level_test_utils import transform_tag_to_prob, transform_tag_to_index, transform_index_to_prob
 
 
 def test_multiclass_input():
@@ -44,7 +44,7 @@ def test_multiclass_input():
                 [BIO2Tag.BEGIN, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
                 [BIO2Tag.INSIDE, BIO2Tag.INSIDE, BIO2Tag.BEGIN, BIO2Tag.BEGIN, BIO2Tag.OUTSIDE],
                 1,
-                3/3
+                3 / 3
             ),
             # Predicted all outside
             # TP= 0; TP+FP = 0
@@ -73,3 +73,37 @@ def test_multiclass_input():
         y_pred = torch.tensor(list(map(transform_tag_to_prob, y_pred))).unsqueeze(0).permute(0, 2, 1)
         y = torch.tensor(list(map(transform_tag_to_index, y))).unsqueeze(0)
         _test(y_pred, y, batch_size, expected_precision)
+
+
+
+
+def test_ignore_index():
+    precision = EntityLevelPrecision(ignore_index=-100)
+
+    def _test(y_pred, y, batch_size, expected_precision):
+        precision.reset()
+        assert precision._updated is False
+
+        if batch_size > 1:
+            n_iters = y.shape[0] // batch_size + 1
+            for i in range(n_iters):
+                idx = i * batch_size
+                precision.update((y_pred[idx: idx + batch_size], y[idx: idx + batch_size]))
+        else:
+            precision.update((y_pred, y))
+
+        assert precision._type == "multiclass"
+        assert precision._updated is True
+        assert isinstance(precision.compute(), torch.Tensor)
+        assert pytest.approx(precision.compute()) == expected_precision
+
+    # TP Seq 1: 1, Seq 2: 3 => TP = 4
+    # FP: Seq 1: 1, Seq 2: 0 => FP = 1
+    # ==> Precision = 4/5
+    y = [[0, 2, 2, 0, -100, -100], [0, 0, 2, 0, 1, 0]]
+    y_pred = [[2, 0, 2, 0, 0, 1], [0, 0, 2, 0, 1, 2]]
+    y_pred = torch.tensor([list(map(transform_index_to_prob, sequence)) for sequence in y_pred]).permute(0, 2, 1)
+    y = torch.tensor(y)
+    _test(y_pred, y, 1, 4/5)
+
+

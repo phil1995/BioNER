@@ -15,3 +15,12 @@ def transform_tag_to_prob(tag: BIO2Tag) -> [float]:
     if tag_index != argmax:
         prob[[tag_index, argmax]] = prob[[argmax, tag_index]]
     return prob
+
+
+def transform_index_to_prob(index: int) -> [float]:
+    prob = np.random.rand(3)
+    # swap max to index
+    argmax = np.argmax(prob)
+    if index != argmax:
+        prob[[index, argmax]] = prob[[argmax, index]]
+    return prob

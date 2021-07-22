@@ -15,10 +15,12 @@ class EntityLevelPrecision(_BasePrecisionRecall):
             output_transform: Callable = lambda x: x,
             average: bool = False,
             device: Union[str, torch.device] = torch.device("cpu"),
+            ignore_index: int = -100
     ):
         super(EntityLevelPrecision, self).__init__(
             output_transform=output_transform, average=average, is_multilabel=False, device=device
         )
+        self.ignore_index = ignore_index
 
     @reinit__is_reduced
     def update(self, output: Sequence[torch.Tensor]) -> None:
@@ -33,12 +35,16 @@ class EntityLevelPrecision(_BasePrecisionRecall):
                 f" and element in y has invalid class = {y.max().item() + 1}."
             )
 
-        gold_standard_labels = _create_BIO2_labels_from_batch_indices(y)
+        gold_standard_labels = _create_BIO2_labels_from_batch_indices(y, ignore_index=self.ignore_index)
         gold_standard_annotations = convert_labeled_tokens_to_annotations(labeled_tokens=gold_standard_labels)
 
         predicted_batch_indices = torch.argmax(y_pred, dim=1)
-        predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices)
-        predicted_annotations = convert_labeled_tokens_to_annotations(labeled_tokens=predicted_labels)
+        predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices,
+                                                                  ignore_index=self.ignore_index)
+
+        filtered_predicted_labels = filtered_labels(gold_standard_labels=gold_standard_labels,
+                                                    predicted_labels=predicted_labels)
+        predicted_annotations = convert_labeled_tokens_to_annotations(labeled_tokens=filtered_predicted_labels)
         true_positives = count_true_positives(gold_standard_annotations=gold_standard_annotations,
                                               predicted_annotations=predicted_annotations)
 
@@ -56,10 +62,12 @@ class EntityLevelRecall(_BasePrecisionRecall):
             output_transform: Callable = lambda x: x,
             average: bool = False,
             device: Union[str, torch.device] = torch.device("cpu"),
+            ignore_index: int = -100
     ):
         super(EntityLevelRecall, self).__init__(
             output_transform=output_transform, average=average, is_multilabel=False, device=device
         )
+        self.ignore_index = ignore_index
 
     @reinit__is_reduced
     def update(self, output: Sequence[torch.Tensor]) -> None:
@@ -74,12 +82,16 @@ class EntityLevelRecall(_BasePrecisionRecall):
                 f" and element in y has invalid class = {y.max().item() + 1}."
             )
 
-        gold_standard_labels = _create_BIO2_labels_from_batch_indices(y)
+        gold_standard_labels = _create_BIO2_labels_from_batch_indices(y, ignore_index=self.ignore_index)
         gold_standard_annotations = convert_labeled_tokens_to_annotations(labeled_tokens=gold_standard_labels)
 
         predicted_batch_indices = torch.argmax(y_pred, dim=1)
-        predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices)
-        predicted_annotations = convert_labeled_tokens_to_annotations(labeled_tokens=predicted_labels)
+        predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices,
+                                                                  ignore_index=self.ignore_index)
+
+        filtered_predicted_labels = filtered_labels(gold_standard_labels=gold_standard_labels,
+                                                    predicted_labels=predicted_labels)
+        predicted_annotations = convert_labeled_tokens_to_annotations(labeled_tokens=filtered_predicted_labels)
         true_positives = count_true_positives(gold_standard_annotations=gold_standard_annotations,
                                               predicted_annotations=predicted_annotations)
 
@@ -104,18 +116,19 @@ class Annotation:
         return False
 
 
-def _create_BIO2_labels_from_batch_indices(indices_batch: [[int]]) -> [[BIO2Tag]]:
+def _create_BIO2_labels_from_batch_indices(indices_batch: [[int]], ignore_index: int) -> [[BIO2Tag]]:
     batch_labels = []
     for indices in indices_batch:
-        labels = _create_BIO2_labels_from_indices(indices)
+        labels = _create_BIO2_labels_from_indices(indices, ignore_index=ignore_index)
         batch_labels.append(labels)
     return batch_labels
 
 
-def _create_BIO2_labels_from_indices(indices: [int]) -> [BIO2Tag]:
+def _create_BIO2_labels_from_indices(indices: [int], ignore_index: int) -> [BIO2Tag]:
     labels = []
     for tag_index in indices:
-        labels.append(BIO2Tag.index_to_type(tag_index))
+        if tag_index != ignore_index:
+            labels.append(BIO2Tag.index_to_type(tag_index))
     return labels
 
 
@@ -159,3 +172,17 @@ def count_true_positives(gold_standard_annotations: [Annotation], predicted_anno
                gold_standard_annotations):
             result += 1
     return result
+
+
+def filtered_labels(gold_standard_labels, predicted_labels):
+    """
+    Filter out the padding from the predicted_labels:
+    We can remove the padding with ignore_index from the gold_standard_labels but not directly from the predicted
+    labels as the predicted index can differ from the orig. "padding index" / ignore_index.
+    Therefore, we exploit that exactly one label is predicted per token and thus truncate the padding
+    by using the length of the already filtered gold_standard_label.
+    """
+    filtered_predicted_labels = []
+    for index, correct_labels in enumerate(gold_standard_labels):
+        filtered_predicted_labels.append(predicted_labels[index][0: len(correct_labels)])
+    return filtered_predicted_labels

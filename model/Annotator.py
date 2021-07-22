@@ -1,14 +1,15 @@
 import logging
 from os.path import join
-from typing import Optional
+from typing import Optional, Sequence, Dict
 
 import fasttext
+import numpy as np
 import torch
 from fasttext.FastText import _FastText
 from ignite.contrib.handlers import TensorboardLogger
-from ignite.engine import Engine, Events, create_supervised_evaluator, create_supervised_trainer, State
+from ignite.engine import Engine, Events, create_supervised_evaluator, State
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
-from ignite.metrics import ConfusionMatrix, Loss
+from ignite.metrics import ConfusionMatrix, Loss, Metric
 from ignite.utils import setup_logger
 from torch import optim, nn
 
@@ -18,16 +19,32 @@ from model.MedMentionsDataset import MedMentionsDataset
 from model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# use ignore_index so that the padded outputs do not contribute to the input gradient when using CrossEntropyLoss
+# see https://pytorch.org/docs/master/generated/torch.nn.CrossEntropyLoss.html#torch.nn.CrossEntropyLoss
+ignore_label_index = -100
 
 
 def collate_batch(batch):
     embeddings_list, label_list = [], []
+    original_lengths = [len(embeddings) for embeddings, _ in batch]
+
+    max_sequence_length = max(len(x) for _, x in batch)
     for (_embedding, _label) in batch:
+        padded_embedding = np.zeros_like(_embedding[0])
+        padded_label = np.ones_like(_label[0]) * ignore_label_index
+        if len(_embedding) != len(_label):
+            raise ValueError("Embeddings length differ from label length expected:", len(_embedding),
+                             "but got:", len(_label))
+
+        for i in range(len(_embedding), max_sequence_length):
+            _embedding.append(padded_embedding)
+            _label.append(padded_label)
         embeddings_list.append(_embedding)
         label_list.append(_label)
     embeddings_list = torch.tensor(embeddings_list, dtype=torch.float)
     label_list = torch.tensor(label_list, dtype=torch.long)
-    return embeddings_list.to(device), label_list.to(device)
+    return embeddings_list.to(device), label_list.to(device), torch.tensor(original_lengths, dtype=torch.long).to(
+        device)
 
 
 class TrainingParameters:
@@ -68,10 +85,11 @@ class Annotator:
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
 
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-        criterion = nn.CrossEntropyLoss()
-        trainer = create_supervised_trainer(model, optimizer, criterion, device=device)
+        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        criterion = nn.CrossEntropyLoss(ignore_index=ignore_label_index)
+
+        trainer = Annotator.create_trainer(model=model, optimizer=optimizer, criterion=criterion)
 
         validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
         validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=True,
@@ -82,8 +100,8 @@ class Annotator:
         metrics = {"Precision": precision, "Recall": recall,
                    "F1": (precision * recall * 2 / (precision + recall + 1e-20)).mean(), "loss": Loss(criterion)}
 
-        train_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
-        validation_evaluator = create_supervised_evaluator(model, metrics=metrics, device=device)
+        train_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
+        validation_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
 
         @trainer.on(Events.EPOCH_COMPLETED)
         def compute_metrics(engine):
@@ -203,3 +221,37 @@ class Annotator:
                 global_step_transform=global_step_from_engine(trainer),
             )
         return tb_logger
+
+    @staticmethod
+    def create_trainer(model: nn.Module, optimizer: optim.Optimizer, criterion: nn.Module):
+        def padding_train_step(trainer, batch):
+            model.train()
+            optimizer.zero_grad()
+            x, y, original_lengths = batch  # prepare_batch(batch)
+            y_pred = model(x, original_lengths)
+            loss = criterion(y_pred, y)
+            loss.backward()
+            optimizer.step()
+            return loss.item()
+
+        return Engine(padding_train_step)
+
+    @staticmethod
+    def create_evaluator(model: BiLSTM, metrics: Dict[str, Metric]):
+        def padding_evaluation_step(engine: Engine, batch: Sequence[torch.Tensor]):
+            model.eval()
+            with torch.no_grad():
+                x, y, original_lengths = batch
+                y_pred = model(x, original_lengths)
+                # transform the output (similar to the output_transform from the PyTorch Ignite
+                # supervised_evaluation_step: lambda x, y, y_pred: (y_pred, y)
+                return y_pred, y
+
+        evaluator = Engine(padding_evaluation_step)
+        Annotator.attach_metrics(metrics=metrics, engine=evaluator)
+        return evaluator
+
+    @staticmethod
+    def attach_metrics(metrics: Dict[str, Metric], engine: Engine):
+        for name, metric in metrics.items():
+            metric.attach(engine, name)

@@ -3,6 +3,7 @@ import math
 from torch import Tensor
 from torch.nn import Linear, LSTM, Module, init
 import torch.nn.functional as F
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 class BiLSTM(Module):
@@ -44,13 +45,15 @@ class BiLSTM(Module):
     def relu(tensor: Linear) -> Tensor:
         init.normal_(tensor.weight, std=math.sqrt(2.0 / tensor.in_features))
 
-    def forward(self, x):
+    def forward(self, x, lengths=None):
         x = self.ff1(x)
         x = F.relu(x)
         x = self.ff2(x)
         x = F.relu(x)
+        x = pack_padded_sequence(x, lengths, batch_first=True, enforce_sorted=False)
         bi_lstm_out, (h, c) = self.biLSTM(x)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
+        lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True)
         tag_space = self.hidden2tag(lstm_out)
         # Permute the tag space as CrossEntropyLoss expects an output shape of: [batch_size, nb_classes, seq_length]
         # see: https://discuss.pytorch.org/t/loss-function-and-lstm-dimension-issues/79291
