@@ -45,12 +45,12 @@ class BiLSTM(Module):
     def relu(tensor: Linear) -> Tensor:
         init.normal_(tensor.weight, std=math.sqrt(2.0 / tensor.in_features))
 
-    def forward(self, x, lengths=None):
+    def forward(self, x, lengths):
         x = self.ff1(x)
         x = F.relu(x)
         x = self.ff2(x)
         x = F.relu(x)
-        x = pack_padded_sequence(x, lengths, batch_first=True, enforce_sorted=False)
+        x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
         bi_lstm_out, (h, c) = self.biLSTM(x)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
         lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True)
