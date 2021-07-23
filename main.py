@@ -26,6 +26,10 @@ if __name__ == '__main__':
                                 type=int,
                                 help='Batch size',
                                 required=True)
+    required_named.add_argument('--learningRate',
+                                type=float,
+                                help='Learning rate',
+                                required=True)
     required_named.add_argument('--modelOutputFolder',
                                 type=str,
                                 help='The folder where the best model should be saved',
@@ -50,6 +54,7 @@ if __name__ == '__main__':
 
     parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
                                     batch_size=args.batchSize,
+                                    learning_rate=args.learningRate,
                                     training_dataset_path=args.training,
                                     validation_dataset_path=args.validation,
                                     test_dataset_path=args.test,

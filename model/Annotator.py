@@ -49,7 +49,7 @@ def collate_batch(batch):
 
 class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
-                 batch_size: int, model_save_path: str, max_epochs: int, num_workers: int = 0,
+                 batch_size: int, learning_rate: float, model_save_path: str, max_epochs: int, num_workers: int = 0,
                  test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
                  training_log_file_path: Optional[str] = None):
         self.encoder_embeddings_path = encoder_embeddings_path
@@ -57,6 +57,7 @@ class TrainingParameters:
         self.validation_dataset_path = validation_dataset_path
         self.test_dataset_path = test_dataset_path
         self.batch_size = batch_size
+        self.learning_rate = learning_rate
         self.model_save_path = model_save_path
         self.max_epochs = max_epochs
         self.num_workers = num_workers
@@ -86,7 +87,7 @@ class Annotator:
 
         model = Annotator.create_model(input_vector_size=encoder.get_dimension())
 
-        optimizer = optim.Adam(model.parameters(), lr=0.001)
+        optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
         criterion = nn.CrossEntropyLoss(ignore_index=ignore_label_index)
 
         trainer = Annotator.create_trainer(model=model, optimizer=optimizer, criterion=criterion)
