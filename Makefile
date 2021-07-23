@@ -7,6 +7,7 @@ python_path :=
 model_output_directory :=
 
 batch_size := 1
+learning_rate := 0.001
 max_epochs := 30
 num_workers := 0
 
@@ -19,145 +20,29 @@ mkfile_dir := $(dir $(mkfile_path))
 
 main_path := $(mkfile_dir)main.py
 
-# Create Model output subdirectories
-setup:
-	mkdir $(model_output_directory)3-3ngrams \
-	$(model_output_directory)3-4ngrams \
-	$(model_output_directory)3-5ngrams \
-	$(model_output_directory)3-6ngrams \
-	$(model_output_directory)4-4ngrams \
-	$(model_output_directory)4-5ngrams \
-	$(model_output_directory)4-6ngrams \
-	$(model_output_directory)5-5ngrams \
-	$(model_output_directory)5-6ngrams \
-	$(model_output_directory)6-6ngrams \
-	$(model_output_directory)3-3ngrams/tensorboard_logs \
-	$(model_output_directory)3-4ngrams/tensorboard_logs \
-	$(model_output_directory)3-5ngrams/tensorboard_logs \
-	$(model_output_directory)3-6ngrams/tensorboard_logs \
-	$(model_output_directory)4-4ngrams/tensorboard_logs \
-	$(model_output_directory)4-5ngrams/tensorboard_logs \
-	$(model_output_directory)4-6ngrams/tensorboard_logs \
-	$(model_output_directory)5-5ngrams/tensorboard_logs \
-	$(model_output_directory)5-6ngrams/tensorboard_logs \
-	$(model_output_directory)6-6ngrams/tensorboard_logs \
+train-all: 
+	$(MAKE) train ngrams=3-3 && \
+	$(MAKE) train ngrams=3-4 && \
+	$(MAKE) train ngrams=3-5 && \
+	$(MAKE) train ngrams=3-6 && \
+	$(MAKE) train ngrams=4-4 && \
+	$(MAKE) train ngrams=4-5 && \
+	$(MAKE) train ngrams=4-6 && \
+	$(MAKE) train ngrams=5-5 && \
+	$(MAKE) train ngrams=5-6 && \
+	$(MAKE) train ngrams=6-6
 
-train-3-3:
+train:
+	# Pass the ngrams parameter, e.g. make train ngrams=3-6
+	mkdir $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate) \
+	$(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
 	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-3ngrams.neg5.1e-5_subs.bin \
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-3ngrams/ \
+	--modelOutputFolder $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)3-3ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)3-3ngrams/tensorboard_logs
-
-train-3-4:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-4ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-4ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)3-4ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)3-4ngrams/tensorboard_logs
-
-train-3-5:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-5ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-5ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)3-5ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)3-5ngrams/tensorboard_logs
-
-train-3-6:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.3-6ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)3-6ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)3-6ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)3-6ngrams/tensorboard_logs
-
-train-4-4:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-4ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)4-4ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)4-4ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)4-4ngrams/tensorboard_logs
-
-train-4-5:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-5ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)4-5ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)4-5ngrams/training.log
-	--tensorboardLogDirectory $(model_output_directory)4-5ngrams/tensorboard_logs
-
-train-4-6:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.4-6ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)4-6ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)4-6ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)4-6ngrams/tensorboard_logs
-
-train-5-5:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.5-5ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)5-5ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)5-5ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)5-5ngrams/tensorboard_logs
-
-train-5-6:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.5-6ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)5-6ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)5-6ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)5-6ngrams/tensorboard_logs
-
-train-6-6:
-	$(python_path) $(main_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.6-6ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)6-6ngrams/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--trainingsLogFile $(model_output_directory)6-6ngrams/training.log \
-	--tensorboardLogDirectory $(model_output_directory)6-6ngrams/tensorboard_logs
+	--trainingsLogFile $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs
