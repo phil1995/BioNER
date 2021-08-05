@@ -12,6 +12,7 @@ class SciBERTNER:
     """
     SciBERT evaluation inspired by MedLinker: https://github.com/danlou/MedLinker
     """
+
     def __init__(self, contextual_ner_path):
         self.contextual_ner = Predictor.from_path(contextual_ner_path, cuda_device=0)
 
