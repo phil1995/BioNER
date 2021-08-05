@@ -1,3 +1,5 @@
+import argparse
+
 from allennlp.predictors.predictor import Predictor
 from allennlp.data.tokenizers import WhitespaceTokenizer
 
@@ -22,7 +24,7 @@ class SciBERTNER:
             for line in labels_f:
                 self.contextual_ner_labels.append(line.strip())
 
-    def eval(self, dataset: MedMentionsDataset):
+    def evaluate(self, dataset: MedMentionsDataset):
         total_true_positives = 0
         total_true_negatives = 0  # TN = 0 as every token gets annotated
         total_false_positives = 0
@@ -74,3 +76,13 @@ def create_bio2_tag_from_bioul_tag(tag: str) -> BIO2Tag:
         return BIO2Tag.BEGIN
     else:
         raise ValueError('Tag does not conform to the BIOUL scheme')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Evaluate SciBERT')
+    parser.add_argument("--evaluationDatasetPath", required=True)
+    parser.add_argument("--contextualNERPath", required=True)
+    args = parser.parse_args()
+    evaluator = SciBERTNER(contextual_ner_path=args.contextualNERPath)
+    evaluation_dataset = MedMentionsDataset(data_file_path=args.evaluationDatasetPath, encoder=None)
+    evaluator.evaluate(dataset=evaluation_dataset)

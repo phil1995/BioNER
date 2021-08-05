@@ -7,4 +7,5 @@ pytorch-ignite==0.4.5
 # Test
 pytest==6.2.4
 numpy==1.20.3
+# Evaluate other models
 allennlp==2.6.0
