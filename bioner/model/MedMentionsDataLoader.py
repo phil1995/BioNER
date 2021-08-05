@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 
-from model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.MedMentionsDataset import MedMentionsDataset
 import random
 
 

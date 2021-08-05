@@ -1,6 +1,6 @@
 import numpy as np
 
-from model.BIO2Tag import BIO2Tag
+from bioner.model.BIO2Tag import BIO2Tag
 
 
 def transform_tag_to_index(tag: BIO2Tag) -> int:

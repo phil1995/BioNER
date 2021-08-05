@@ -1,5 +1,5 @@
 import unittest
-from preprocessing.pubmed_parser import PubMedParser
+from bioner.preprocessing.pubmed_parser import PubMedParser
 import os
 import pathlib
 

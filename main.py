@@ -1,6 +1,6 @@
 import argparse
 import torch
-from model.Annotator import Annotator, TrainingParameters
+from bioner.model import Annotator, TrainingParameters
 
 if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')

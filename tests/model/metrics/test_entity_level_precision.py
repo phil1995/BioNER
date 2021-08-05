@@ -1,8 +1,8 @@
 import pytest
 import torch
 
-from model.BIO2Tag import BIO2Tag
-from model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision
+from bioner.model.BIO2Tag import BIO2Tag
+from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision
 from entity_level_test_utils import transform_tag_to_prob, transform_tag_to_index, transform_index_to_prob
 
 

@@ -4,11 +4,11 @@ import itertools as it
 from fasttext.FastText import _FastText
 from torch.utils.data import Dataset
 
-from model.BIO2Tag import BIO2Tag
-from model.Document import Document
-from model.EncodedToken import EncodedToken
-from model.Sentence import Sentence
-from model.Token import Token
+from bioner.model.BIO2Tag import BIO2Tag
+from bioner.model.Document import Document
+from bioner.model.EncodedToken import EncodedToken
+from bioner.model.Sentence import Sentence
+from bioner.model.Token import Token
 
 
 class MedMentionsDataset(Dataset):

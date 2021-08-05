@@ -13,10 +13,10 @@ from ignite.metrics import ConfusionMatrix, Loss, Metric
 from ignite.utils import setup_logger
 from torch import optim, nn
 
-from model.BiLSTM import BiLSTM
-from model.MedMentionsDataLoader import MedMentionsDataLoader
-from model.MedMentionsDataset import MedMentionsDataset
-from model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
+from bioner.model.BiLSTM import BiLSTM
+from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
+from bioner.model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # use ignore_index so that the padded outputs do not contribute to the input gradient when using CrossEntropyLoss

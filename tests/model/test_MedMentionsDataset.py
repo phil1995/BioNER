@@ -1,8 +1,8 @@
-from model.BIO2Tag import BIO2Tag
-from model.Document import Document
-from model.MedMentionsDataset import MedMentionsDataset
-from model.Sentence import Sentence
-from model.Token import Token
+from bioner.model.BIO2Tag import BIO2Tag
+from bioner.model.Document import Document
+from bioner.model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.Sentence import Sentence
+from bioner.model.Token import Token
 
 
 def test_read_documents_empty_lines_at_the_end(tmpdir):
