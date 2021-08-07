@@ -16,6 +16,7 @@ from torch import optim, nn
 from bioner.model.BiLSTM import BiLSTM
 from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
 from bioner.model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.datexis_model import DATEXISModel
 from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -51,7 +52,7 @@ class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
                  batch_size: int, learning_rate: float, model_save_path: str, max_epochs: int, num_workers: int = 0,
                  test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
-                 training_log_file_path: Optional[str] = None):
+                 training_log_file_path: Optional[str] = None, use_original_datexis_ner_model: bool = False):
         self.encoder_embeddings_path = encoder_embeddings_path
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
@@ -63,6 +64,7 @@ class TrainingParameters:
         self.num_workers = num_workers
         self.tensorboard_log_directory_path = tensorboard_log_directory_path
         self.training_log_file_path = training_log_file_path
+        self.use_original_datexis_ner_model = use_original_datexis_ner_model
 
 
 class TestParameters:
@@ -84,10 +86,13 @@ class Annotator:
         training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=True,
                                                      num_workers=parameters.num_workers,
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
+        if parameters.use_original_datexis_ner_model:
+            model = Annotator.create_original_datexis_ner_model(input_vector_size=encoder.get_dimension())
+            optimizer = optim.SGD(model.parameters(), lr=0.005)
+        else:
+            model = Annotator.create_model(input_vector_size=encoder.get_dimension())
+            optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
 
-        model = Annotator.create_model(input_vector_size=encoder.get_dimension())
-
-        optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
         criterion = nn.CrossEntropyLoss(ignore_index=ignore_label_index)
 
         trainer = Annotator.create_trainer(model=model, optimizer=optimizer, criterion=criterion)
@@ -206,6 +211,18 @@ class Annotator:
         """
         model = BiLSTM(input_vector_size=input_vector_size, feedforward_layer_size=feedforward_layer_size,
                        lstm_layer_size=lstm_layer_size)
+        model.to(device)
+        return model
+
+    @staticmethod
+    def create_original_datexis_ner_model(input_vector_size: int) -> DATEXISModel:
+        """
+
+        Creates the original DATEXIS-NER model from the paper:
+        Robust Named Entity Recognition in Idiosyncratic Domains (https://arxiv.org/abs/1608.06757)
+        :param input_vector_size: the size of the embeddings
+        """
+        model = DATEXISModel(input_vector_size=input_vector_size)
         model.to(device)
         return model
 

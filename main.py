@@ -1,6 +1,6 @@
 import argparse
 import torch
-from bioner.model import Annotator, TrainingParameters
+from bioner.model.Annotator import Annotator, TrainingParameters
 
 if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')
@@ -50,6 +50,10 @@ if __name__ == '__main__':
                                 type=str,
                                 help='The file path where to log the PyTorch Ignite training and validation',
                                 required=False)
+    required_named.add_argument('--useOriginalDATEXISNERModel',
+                                action='store_true',
+                                help='Set if you want to use the original DATEXIS-NER model',
+                                required=False)
     args = parser.parse_args()
 
     parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
@@ -62,7 +66,8 @@ if __name__ == '__main__':
                                     max_epochs=args.maxEpochs,
                                     num_workers=args.numWorkers,
                                     tensorboard_log_directory_path=args.tensorboardLogDirectory,
-                                    training_log_file_path=args.trainingsLogFile)
+                                    training_log_file_path=args.trainingsLogFile,
+                                    use_original_datexis_ner_model=args.useOriginalDATEXISNERModel)
     Annotator.train(parameters)
 
 
