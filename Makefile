@@ -74,3 +74,32 @@ train-original:
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
 	--useOriginalDATEXISNERModel
+
+train-all-original-adam:
+	$(MAKE) train-original-adam ngrams=3-3 && \
+	$(MAKE) train-original-adam ngrams=3-4 && \
+	$(MAKE) train-original-adam ngrams=3-5 && \
+	$(MAKE) train-original-adam ngrams=3-6 && \
+	$(MAKE) train-original-adam ngrams=4-4 && \
+	$(MAKE) train-original-adam ngrams=4-5 && \
+	$(MAKE) train-original-adam ngrams=4-6 && \
+	$(MAKE) train-original-adam ngrams=5-5 && \
+	$(MAKE) train-original-adam ngrams=5-6 && \
+	$(MAKE) train-original-adam ngrams=6-6
+
+train-original-adam:
+	# Pass the ngrams parameter, e.g. make train ngrams=3-6
+	mkdir $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate) \
+	$(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	$(python_path) $(main_path) \
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
+	--training $(training_dataset) \
+	--validation $(validation_dataset) \
+	--modelOutputFolder $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/ \
+	--batchSize $(batch_size) \
+	--maxEpochs $(max_epochs) \
+	--numWorkers $(num_workers) \
+	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	--useOriginalDATEXISNERModel \
+	--useAdamForOriginalDATEXISNERModel

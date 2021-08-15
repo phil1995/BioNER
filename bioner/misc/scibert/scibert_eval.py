@@ -6,7 +6,7 @@ from allennlp.predictors.predictor import Predictor
 from allennlp.data.tokenizers.word_splitter import JustSpacesWordSplitter
 
 from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.Token import Token
 from bioner.model.metrics.EntityLevelPrecisionRecall import convert_labeled_tokens_to_annotations, count_true_positives
 
@@ -30,7 +30,7 @@ class SciBERTNER:
             for line in labels_f:
                 self.contextual_ner_labels.append(line.strip())
 
-    def evaluate(self, dataset: MedMentionsDataset):
+    def evaluate(self, dataset: CoNLLDataset):
         total_true_positives = 0
         total_true_negatives = 0  # TN = 0 as every token gets annotated
         total_false_positives = 0
@@ -99,7 +99,7 @@ class SciBERTNER:
         predicted_bio2_tags = create_bio2_tags_from_bioul_tags(predicted_tags)
         return predicted_bio2_tags
 
-    def annotate(self, dataset: MedMentionsDataset) -> MedMentionsDataset:
+    def annotate(self, dataset: CoNLLDataset) -> CoNLLDataset:
         annotated_dataset = deepcopy(dataset)
 
         for doc_index, document in enumerate(dataset.documents):
@@ -113,7 +113,7 @@ class SciBERTNER:
         return annotated_dataset
 
     def annotate_to_file(self, dataset_file_path: str, output_file_path: str):
-        dataset = MedMentionsDataset(data_file_path=dataset_file_path, encoder=None)
+        dataset = CoNLLDataset(data_file_path=dataset_file_path, encoder=None)
         annotated_dataset = self.annotate(dataset=dataset)
         write_dataset_to_conll_file(dataset=dataset, annotated_dataset=annotated_dataset,
                                     file_path=output_file_path)
@@ -135,7 +135,7 @@ def create_bio2_tag_from_bioul_tag(tag: str) -> BIO2Tag:
         raise ValueError('Tag does not conform to the BIOUL scheme')
 
 
-def write_dataset_to_conll_file(dataset: MedMentionsDataset, annotated_dataset: MedMentionsDataset, file_path: str):
+def write_dataset_to_conll_file(dataset: CoNLLDataset, annotated_dataset: CoNLLDataset, file_path: str):
     with open(file_path, 'w', encoding='utf8') as output_file:
         for document_index, document in enumerate(dataset.documents):
             annotated_document = annotated_dataset.documents[document_index]
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     parser.add_argument("--outputFilePath")
     args = parser.parse_args()
     evaluator = SciBERTNER(contextual_ner_path=args.contextualNERPath)
-    evaluation_dataset = MedMentionsDataset(data_file_path=args.evaluationDatasetPath, encoder=None)
+    evaluation_dataset = CoNLLDataset(data_file_path=args.evaluationDatasetPath, encoder=None)
     if args.outputFilePath:
         evaluator.annotate_to_file(dataset_file_path=args.evaluationDatasetPath,
                                    output_file_path=args.outputFilePath)

@@ -14,8 +14,9 @@ from ignite.utils import setup_logger
 from torch import optim, nn
 
 from bioner.model.BiLSTM import BiLSTM
+from bioner.model.BiLSTM_SingleFF import BiLSTMSingleFF
 from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
-from bioner.model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.datexis_model import DATEXISModel
 from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
 
@@ -52,7 +53,7 @@ class TrainingParameters:
     def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
                  batch_size: int, learning_rate: float, model_save_path: str, max_epochs: int, num_workers: int = 0,
                  test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
-                 training_log_file_path: Optional[str] = None, use_original_datexis_ner_model: bool = False):
+                 training_log_file_path: Optional[str] = None, use_original_datexis_ner_model: bool = False, use_original_datexis_ner_model_adam: bool = False):
         self.encoder_embeddings_path = encoder_embeddings_path
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
@@ -65,6 +66,7 @@ class TrainingParameters:
         self.tensorboard_log_directory_path = tensorboard_log_directory_path
         self.training_log_file_path = training_log_file_path
         self.use_original_datexis_ner_model = use_original_datexis_ner_model
+        self.use_original_datexis_ner_model_adam = use_original_datexis_ner_model_adam
 
 
 class TestParameters:
@@ -88,7 +90,10 @@ class Annotator:
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
         if parameters.use_original_datexis_ner_model:
             model = Annotator.create_original_datexis_ner_model(input_vector_size=encoder.get_dimension())
-            optimizer = optim.SGD(model.parameters(), lr=0.005)
+            if parameters.use_original_datexis_ner_model_adam:
+                optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
+            else:
+                optimizer = optim.SGD(model.parameters(), lr=0.005)
         else:
             model = Annotator.create_model(input_vector_size=encoder.get_dimension())
             optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
@@ -196,8 +201,8 @@ class Annotator:
         return engine.state.metrics['F1']
 
     @staticmethod
-    def load_dataset(path, encoder) -> MedMentionsDataset:
-        structured_dataset = MedMentionsDataset(path, encoder=encoder)
+    def load_dataset(path, encoder) -> CoNLLDataset:
+        structured_dataset = CoNLLDataset(path, encoder=encoder)
         return structured_dataset
 
     @staticmethod

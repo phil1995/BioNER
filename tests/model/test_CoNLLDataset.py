@@ -1,6 +1,6 @@
 from bioner.model.BIO2Tag import BIO2Tag
 from bioner.model.Document import Document
-from bioner.model.MedMentionsDataset import MedMentionsDataset
+from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.Sentence import Sentence
 from bioner.model.Token import Token
 
@@ -13,7 +13,7 @@ def test_read_documents_empty_lines_at_the_end(tmpdir):
     with open(file_path, "w") as text_file:
         text_file.write(content)
 
-    dataset = MedMentionsDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path, encoder=None)
     assert len(dataset.documents) == 2
     expected_documents = create_expected_documents_for_test_document()
     assert expected_documents == dataset.documents
@@ -26,7 +26,7 @@ def test_read_documents(tmpdir):
     with open(file_path, "w") as text_file:
         text_file.write(content)
 
-    dataset = MedMentionsDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path, encoder=None)
     assert len(dataset.documents) == 2
     expected_documents = create_expected_documents_for_test_document()
     assert expected_documents == dataset.documents
@@ -38,7 +38,7 @@ def test_flatten_documents(tmpdir):
 
     with open(file_path, "w") as text_file:
         text_file.write(content)
-    dataset = MedMentionsDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path, encoder=None)
 
     assert dataset.sentences is None
     dataset.flatten_dataset()

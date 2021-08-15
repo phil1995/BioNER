@@ -54,6 +54,10 @@ if __name__ == '__main__':
                                 action='store_true',
                                 help='Set if you want to use the original DATEXIS-NER model',
                                 required=False)
+    required_named.add_argument('--useAdamForOriginalDATEXISNERModel',
+                                action='store_true',
+                                help='Set if you want to use Adam as optimizer for original DATEXIS-NER model',
+                                required=False)
     args = parser.parse_args()
 
     parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
@@ -67,7 +71,8 @@ if __name__ == '__main__':
                                     num_workers=args.numWorkers,
                                     tensorboard_log_directory_path=args.tensorboardLogDirectory,
                                     training_log_file_path=args.trainingsLogFile,
-                                    use_original_datexis_ner_model=args.useOriginalDATEXISNERModel)
+                                    use_original_datexis_ner_model=args.useOriginalDATEXISNERModel,
+                                    use_original_datexis_ner_model_adam=args.useAdamForOriginalDATEXISNERModel)
     Annotator.train(parameters)
 
 

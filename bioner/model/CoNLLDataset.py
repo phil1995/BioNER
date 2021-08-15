@@ -11,9 +11,9 @@ from bioner.model.Sentence import Sentence
 from bioner.model.Token import Token
 
 
-class MedMentionsDataset(Dataset):
+class CoNLLDataset(Dataset):
     """
-    The MedMentionsDataset with embeddings
+    The CoNLLDataset with embeddings
 
     Note: Before using it as a PyTorch.Dataset you should call flatten_dataset()
     This is because the dataset is structured in the following way:
@@ -37,7 +37,7 @@ class MedMentionsDataset(Dataset):
             ids = it.count(1)
             current_doc_id = 0
             current_sentences = []
-            for new_doc, doc_rows in it.groupby(rows, MedMentionsDataset.is_a_document_separator):
+            for new_doc, doc_rows in it.groupby(rows, CoNLLDataset.is_a_document_separator):
                 if new_doc:
                     if current_sentences:
                         document = Document(id=current_doc_id, sentences=current_sentences)
@@ -47,7 +47,7 @@ class MedMentionsDataset(Dataset):
                 else:
                     current_tokens = []
                     for new_sentence, sentence_row in it.groupby(doc_rows,
-                                                                 MedMentionsDataset.sentence_separator):
+                                                                 CoNLLDataset.sentence_separator):
                         if new_sentence:
                             if current_tokens:
                                 sentence = Sentence(tokens=current_tokens)
@@ -70,7 +70,7 @@ class MedMentionsDataset(Dataset):
     def is_a_document_separator(row):
         if len(row) == 0:
             return False
-        elif row[0].startswith(MedMentionsDataset.DOC_START):
+        elif row[0].startswith(CoNLLDataset.DOC_START):
             return True
         else:
             return False
