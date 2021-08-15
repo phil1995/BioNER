@@ -43,6 +43,7 @@ train:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs
 
@@ -69,6 +70,7 @@ train-original:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
 	--useOriginalDATEXISNERModel
@@ -96,6 +98,7 @@ train-original-adam:
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
 	--useOriginalDATEXISNERModel \
