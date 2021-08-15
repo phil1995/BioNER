@@ -34,7 +34,7 @@ train-all:
 
 train:
 	# Pass the ngrams parameter, e.g. make train ngrams=3-6
-	mkdir -p $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	mkdir -p $(model_output_directory)$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
 	$(python_path) $(main_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
@@ -60,7 +60,7 @@ train-all-original:
 
 train-original:
 	# Pass the ngrams parameter, e.g. make train ngrams=3-6
-	mkdir -p $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	mkdir -p $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
 	$(python_path) $(main_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
@@ -87,7 +87,7 @@ train-all-original-adam:
 
 train-original-adam:
 	# Pass the ngrams parameter, e.g. make train ngrams=3-6
-	mkdir -p $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	mkdir -p $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
 	$(python_path) $(main_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
