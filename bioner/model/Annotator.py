@@ -14,7 +14,6 @@ from ignite.utils import setup_logger
 from torch import optim, nn
 
 from bioner.model.BiLSTM import BiLSTM
-from bioner.model.BiLSTM_SingleFF import BiLSTMSingleFF
 from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.datexis_model import DATEXISModel
