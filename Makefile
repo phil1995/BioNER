@@ -73,7 +73,7 @@ train-original:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--useOriginalDATEXISNERModel
+	--model DATEXIS-NER
 
 train-all-original-adam:
 	$(MAKE) train-original-adam ngrams=3-3 && \
@@ -101,5 +101,32 @@ train-original-adam:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--useOriginalDATEXISNERModel \
-	--useAdamForOriginalDATEXISNERModel
+	--model DATEXIS-NER
+
+train-all-custom-DATEXIS:
+	$(MAKE) train-custom-DATEXIS ngrams=3-3 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=3-4 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=3-5 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=3-6 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=4-4 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=4-5 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=4-6 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=5-5 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=5-6 ff=$(ff) lstm=$(lstm) && \
+	$(MAKE) train-custom-DATEXIS ngrams=6-6 ff=$(ff) lstm=$(lstm)
+	
+train-custom-DATEXIS:
+	# Pass the ngrams parameter, e.g. make train ngrams=3-6
+	mkdir -p $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/tensorboard_logs  && \
+	$(python_path) $(main_path) \
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
+	--training $(training_dataset) \
+	--validation $(validation_dataset) \
+	--modelOutputFolder $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/ \
+	--batchSize $(batch_size) \
+	--maxEpochs $(max_epochs) \
+	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
+	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/tensorboard_logs \
+	--model CustomConfig_DATEXIS-NER

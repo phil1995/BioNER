@@ -2,11 +2,10 @@ import logging
 from os.path import join
 from typing import Optional, Sequence, Dict
 
-import fasttext
 import numpy as np
 import torch
 from fasttext.FastText import _FastText
-from ignite.contrib.handlers import TensorboardLogger
+from ignite.contrib.handlers import TensorboardLogger, ProgressBar
 from ignite.engine import Engine, Events, create_supervised_evaluator, State
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
 from ignite.metrics import ConfusionMatrix, Loss, Metric
@@ -49,23 +48,23 @@ def collate_batch(batch):
 
 
 class TrainingParameters:
-    def __init__(self, encoder_embeddings_path: str, training_dataset_path: str, validation_dataset_path: str,
-                 batch_size: int, learning_rate: float, model_save_path: str, max_epochs: int, num_workers: int = 0,
+    def __init__(self, encoder: _FastText, training_dataset_path: str, validation_dataset_path: str,
+                 model: nn.Module, model_save_path: str, optimizer: optim,
+                 batch_size: int, max_epochs: int, num_workers: int = 0,
                  test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
-                 training_log_file_path: Optional[str] = None, use_original_datexis_ner_model: bool = False, use_original_datexis_ner_model_adam: bool = False):
-        self.encoder_embeddings_path = encoder_embeddings_path
+                 training_log_file_path: Optional[str] = None):
+        self.encoder = encoder
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
         self.test_dataset_path = test_dataset_path
-        self.batch_size = batch_size
-        self.learning_rate = learning_rate
+        self.model = model
         self.model_save_path = model_save_path
+        self.optimizer = optimizer
+        self.batch_size = batch_size
         self.max_epochs = max_epochs
         self.num_workers = num_workers
         self.tensorboard_log_directory_path = tensorboard_log_directory_path
         self.training_log_file_path = training_log_file_path
-        self.use_original_datexis_ner_model = use_original_datexis_ner_model
-        self.use_original_datexis_ner_model_adam = use_original_datexis_ner_model_adam
 
 
 class TestParameters:
@@ -81,25 +80,16 @@ class Annotator:
     def train(parameters: TrainingParameters):
         print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs} "
               f"on {parameters.training_dataset_path}")
-        encoder = fasttext.load_model(parameters.encoder_embeddings_path)
-
+        encoder = parameters.encoder
+        model = parameters.model
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
         training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=True,
                                                      num_workers=parameters.num_workers,
                                                      batch_size=parameters.batch_size, collate_fn=collate_batch)
-        if parameters.use_original_datexis_ner_model:
-            model = Annotator.create_original_datexis_ner_model(input_vector_size=encoder.get_dimension())
-            if parameters.use_original_datexis_ner_model_adam:
-                optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
-            else:
-                optimizer = optim.SGD(model.parameters(), lr=0.005)
-        else:
-            model = Annotator.create_model(input_vector_size=encoder.get_dimension())
-            optimizer = optim.Adam(model.parameters(), lr=parameters.learning_rate)
 
         criterion = nn.CrossEntropyLoss(ignore_index=ignore_label_index)
 
-        trainer = Annotator.create_trainer(model=model, optimizer=optimizer, criterion=criterion)
+        trainer = Annotator.create_trainer(model=model, optimizer=parameters.optimizer, criterion=criterion)
 
         validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
         validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=True,
@@ -151,6 +141,10 @@ class Annotator:
                                                          trainer=trainer,
                                                          train_evaluator=train_evaluator,
                                                          validation_evaluator=validation_evaluator)
+        # Add Progress Bars
+        ProgressBar(persist=False, desc="Train").attach(trainer)
+        ProgressBar(persist=False, desc="Train Evaluation").attach(train_evaluator)
+        ProgressBar(persist=False, desc="Validation Evaluation").attach(validation_evaluator)
 
         # Start the training
         trainer.run(training_data_loader, max_epochs=parameters.max_epochs)

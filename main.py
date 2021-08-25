@@ -1,6 +1,10 @@
 import argparse
 import torch
+import fasttext
+from torch import optim
+
 from bioner.model.Annotator import Annotator, TrainingParameters
+from bioner.model.model_loader import ModelLoader, LayerConfigurationCreator
 
 if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')
@@ -50,19 +54,28 @@ if __name__ == '__main__':
                                 type=str,
                                 help='The file path where to log the PyTorch Ignite training and validation',
                                 required=False)
-    required_named.add_argument('--useOriginalDATEXISNERModel',
-                                action='store_true',
-                                help='Set if you want to use the original DATEXIS-NER model',
+    required_named.add_argument('--model',
+                                type=str,
+                                help='The name of the model you want to use. Possible options: [DATEXIS-NER,'
+                                     ' CustomConfig_DATEXIS-NER]',
+                                required=True),
+    required_named.add_argument('--ff1',
+                                type=int,
+                                help='The layer size of the first feed forward layer',
                                 required=False)
-    required_named.add_argument('--useAdamForOriginalDATEXISNERModel',
-                                action='store_true',
-                                help='Set if you want to use Adam as optimizer for original DATEXIS-NER model',
+    required_named.add_argument('--lstm1',
+                                type=int,
+                                help='The layer size of the first LSTM layer',
                                 required=False)
     args = parser.parse_args()
 
-    parameters = TrainingParameters(encoder_embeddings_path=args.embeddings,
+    encoder = fasttext.load_model(args.embeddings)
+    layer_configuration = LayerConfigurationCreator.create_layer_configuration(input_vector_size=encoder.get_dimension(),
+                                                                               args=args)
+    model = ModelLoader.load_model(name=args.model,
+                                   layer_configuration=layer_configuration)
+    parameters = TrainingParameters(encoder=encoder,
                                     batch_size=args.batchSize,
-                                    learning_rate=args.learningRate,
                                     training_dataset_path=args.training,
                                     validation_dataset_path=args.validation,
                                     test_dataset_path=args.test,
@@ -71,8 +84,6 @@ if __name__ == '__main__':
                                     num_workers=args.numWorkers,
                                     tensorboard_log_directory_path=args.tensorboardLogDirectory,
                                     training_log_file_path=args.trainingsLogFile,
-                                    use_original_datexis_ner_model=args.useOriginalDATEXISNERModel,
-                                    use_original_datexis_ner_model_adam=args.useAdamForOriginalDATEXISNERModel)
+                                    optimizer=optim.Adam(model.parameters(), lr=args.learningRate),
+                                    model=model)
     Annotator.train(parameters)
-
-
