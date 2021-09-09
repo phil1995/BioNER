@@ -76,7 +76,7 @@ class StackedBiLSTMModel(Module):
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
         self.biLSTM = LSTM(input_size=feedforward_layer_size,
                            bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
-        self.biLSTM2 = LSTM(input_size=feedforward_layer_size,
+        self.biLSTM2 = LSTM(input_size=lstm_layer_size * 2,
                             bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
         self.encoderLSTM = LSTM(input_size=lstm_layer_size * 2, hidden_size=lstm_layer_size, batch_first=True)
         self.hidden2tag = Linear(in_features=lstm_layer_size, out_features=out_features)
