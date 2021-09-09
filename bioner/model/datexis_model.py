@@ -8,7 +8,6 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 class DATEXISModel(Module):
 
-    # de.datexis.ner.tagger.MentionTagger initializing BLSTM network 6075:512:512:256:3
     def __init__(self,
                  input_vector_size: int,
                  feedforward_layer_size: int = 150,
@@ -48,7 +47,6 @@ class DATEXISModel(Module):
 
     def forward(self, x, lengths):
         x = self.ff1(x)
-        x = F.relu(x)
         x = F.relu(x)
         x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
         bi_lstm_out, (h, c) = self.biLSTM(x)
