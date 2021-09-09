@@ -2,7 +2,7 @@ from argparse import Namespace
 
 from torch import nn
 
-from bioner.model.datexis_model import DATEXISModel
+from bioner.model.datexis_model import DATEXISModel, StackedBiLSTMModel
 
 
 class LayerConfiguration:
@@ -45,6 +45,8 @@ class ModelLoader:
                 input_vector_size=layer_configuration.input_vector_size)
         if name == "CustomConfig_DATEXIS-NER":
             return ModelLoader.create_custom_datexis_ner_model(layer_configuration=layer_configuration)
+        if name == "CustomConfig_Stacked-DATEXIS-NER":
+            return ModelLoader.create_custom_stacked_datexis_ner_model(layer_configuration=layer_configuration)
 
     @staticmethod
     def create_original_datexis_ner_model(input_vector_size: int) -> DATEXISModel:
@@ -67,3 +69,17 @@ class ModelLoader:
                             feedforward_layer_size=layer_configuration.feedforward_layer_size,
                             lstm_layer_size=layer_configuration.lstm_layer_size,
                             out_features=layer_configuration.out_features)
+
+    @staticmethod
+    def create_custom_stacked_datexis_ner_model(
+            layer_configuration: DATEXISNERLayerConfiguration) -> StackedBiLSTMModel:
+        """
+        Creates a model similar to the original DATEXIS-NER model from the paper:
+        Robust Named Entity Recognition in Idiosyncratic Domains (https://arxiv.org/abs/1608.06757)
+        but with a custom layer configuration and stacked BiLSTM
+        :param layer_configuration: the custom layer configuration for the model
+        """
+        return StackedBiLSTMModel(input_vector_size=layer_configuration.input_vector_size,
+                                  feedforward_layer_size=layer_configuration.feedforward_layer_size,
+                                  lstm_layer_size=layer_configuration.lstm_layer_size,
+                                  out_features=layer_configuration.out_features)
