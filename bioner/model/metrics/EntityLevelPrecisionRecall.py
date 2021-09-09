@@ -125,11 +125,7 @@ def _create_BIO2_labels_from_batch_indices(indices_batch: [[int]], ignore_index:
 
 
 def _create_BIO2_labels_from_indices(indices: [int], ignore_index: int) -> [BIO2Tag]:
-    labels = []
-    for tag_index in indices:
-        if tag_index != ignore_index:
-            labels.append(BIO2Tag.index_to_type(tag_index))
-    return labels
+    return [BIO2Tag.index_to_type(tag_index) for tag_index in indices if tag_index != ignore_index]
 
 
 def convert_labeled_tokens_to_annotations(labeled_tokens: [[BIO2Tag]]) -> [Annotation]:
