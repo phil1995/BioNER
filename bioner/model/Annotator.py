@@ -82,6 +82,7 @@ class Annotator:
               f"on {parameters.training_dataset_path}")
         encoder = parameters.encoder
         model = parameters.model
+        model = model.to(device)
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
         training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=True,
                                                      num_workers=parameters.num_workers,
