@@ -100,4 +100,5 @@ class ModelLoader:
         return StackedBiLSTMModel(input_vector_size=layer_configuration.input_vector_size,
                                   feedforward_layer_size=layer_configuration.feedforward_layer_size,
                                   lstm_layer_size=layer_configuration.lstm_layer_size,
-                                  out_features=layer_configuration.out_features)
+                                  out_features=layer_configuration.out_features,
+                                  additional_bilstm_layer=layer_configuration.amount_of_stacked_bilstm_layer)
