@@ -1,7 +1,7 @@
 import math
 
 from torch import Tensor
-from torch.nn import Linear, LSTM, Module, init
+from torch.nn import Linear, LSTM, Module, init, ModuleList
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
@@ -78,12 +78,11 @@ class StackedBiLSTMModel(Module):
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
         self.biLSTM = LSTM(input_size=feedforward_layer_size,
                            bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
-        self.additional_biLSTM_layers = []
-        for i in range(0, additional_bilstm_layer):
-            self.additional_biLSTM_layers.append(LSTM(input_size=lstm_layer_size * 2,
-                                                      bidirectional=True,
-                                                      hidden_size=lstm_layer_size,
-                                                      batch_first=True))
+        self.additional_biLSTM_layers = ModuleList([LSTM(input_size=lstm_layer_size * 2,
+                                                         bidirectional=True,
+                                                         hidden_size=lstm_layer_size,
+                                                         batch_first=True)
+                                                    for i in range(additional_bilstm_layer)])
         self.encoderLSTM = LSTM(input_size=lstm_layer_size * 2, hidden_size=lstm_layer_size, batch_first=True)
         self.hidden2tag = Linear(in_features=lstm_layer_size, out_features=out_features)
         self.init_weights()
