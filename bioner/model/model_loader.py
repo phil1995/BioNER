@@ -21,9 +21,27 @@ class DATEXISNERLayerConfiguration(LayerConfiguration):
         self.out_features = out_features
 
 
+class DATEXISNERStackedBiLSTMLayerConfiguration(LayerConfiguration):
+    def __init__(self, input_vector_size: int,
+                 feedforward_layer_size: int = 150,
+                 lstm_layer_size: int = 20,
+                 out_features: int = 3,
+                 amount_of_stacked_bilstm_layer: int = 1):
+        super().__init__(input_vector_size=input_vector_size,
+                         feedforward_layer_size=feedforward_layer_size,
+                         lstm_layer_size=lstm_layer_size,
+                         out_features=out_features)
+        self.amount_of_stacked_bilstm_layer = amount_of_stacked_bilstm_layer
+
+
 class LayerConfigurationCreator:
     @staticmethod
     def create_layer_configuration(input_vector_size: int, args: Namespace):
+        if args.ff1 is not None and args.lstm1 is not None and args.additionalBiLSTMLayers is not None:
+            return DATEXISNERStackedBiLSTMLayerConfiguration(input_vector_size=input_vector_size,
+                                                             feedforward_layer_size=args.ff1,
+                                                             lstm_layer_size=args.lstm1,
+                                                             amount_of_stacked_bilstm_layer=args.additionalBiLSTMLayers)
         if args.ff1 is not None and args.lstm1 is not None:
             return DATEXISNERLayerConfiguration(input_vector_size=input_vector_size,
                                                 feedforward_layer_size=args.ff1,
@@ -72,7 +90,7 @@ class ModelLoader:
 
     @staticmethod
     def create_custom_stacked_datexis_ner_model(
-            layer_configuration: DATEXISNERLayerConfiguration) -> StackedBiLSTMModel:
+            layer_configuration: DATEXISNERStackedBiLSTMLayerConfiguration) -> StackedBiLSTMModel:
         """
         Creates a model similar to the original DATEXIS-NER model from the paper:
         Robust Named Entity Recognition in Idiosyncratic Domains (https://arxiv.org/abs/1608.06757)

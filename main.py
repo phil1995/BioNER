@@ -67,6 +67,10 @@ if __name__ == '__main__':
                                 type=int,
                                 help='The layer size of the first LSTM layer',
                                 required=False)
+    required_named.add_argument('--additionalBiLSTMLayers',
+                                type=int,
+                                help='The amount of additional BiLSTM layers (stacked)',
+                                required=False)
     args = parser.parse_args()
 
     encoder = fasttext.load_model(args.embeddings)

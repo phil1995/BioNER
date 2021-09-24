@@ -60,9 +60,9 @@ class DATEXISModel(Module):
 
 
 class StackedBiLSTMModel(Module):
-
     def __init__(self,
                  input_vector_size: int,
+                 additional_bilstm_layer: int = 1,
                  feedforward_layer_size: int = 150,
                  lstm_layer_size: int = 20,
                  out_features: int = 3):
@@ -72,12 +72,16 @@ class StackedBiLSTMModel(Module):
             f"Initialize StackedBiLSTMModel Network: Input Vector Size:{input_vector_size} "
             f"Feedforward Layer Size:{feedforward_layer_size} "
             f"LSTM Layer Size:{lstm_layer_size} "
-            f"Out Feature Size:{out_features}")
+            f"Out Feature Size:{out_features}"
+            f"# Stacked BiLSTMs:{additional_bilstm_layer}")
+        assert additional_bilstm_layer >= 0
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
         self.biLSTM = LSTM(input_size=feedforward_layer_size,
                            bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
-        self.biLSTM2 = LSTM(input_size=lstm_layer_size * 2,
-                            bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
+        self.additional_biLSTM_layers = []
+        for i in range(0, additional_bilstm_layer):
+            self.biLSTM_stack.append(LSTM(input_size=lstm_layer_size * 2,
+                                          bidirectional=True, hidden_size=lstm_layer_size, batch_first=True))
         self.encoderLSTM = LSTM(input_size=lstm_layer_size * 2, hidden_size=lstm_layer_size, batch_first=True)
         self.hidden2tag = Linear(in_features=lstm_layer_size, out_features=out_features)
         self.init_weights()
