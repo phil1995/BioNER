@@ -91,7 +91,8 @@ class StackedBiLSTMModel(Module):
     def init_weights(self):
         DATEXISModel.relu(self.ff1)
         self.xavier_normal(self.biLSTM)
-        self.xavier_normal(self.biLSTM2)
+        for additional_biLSTM_layer in self.additional_biLSTM_layers:
+            self.xavier_normal(additional_biLSTM_layer)
         self.xavier_normal(self.encoderLSTM)
         init.xavier_normal_(self.hidden2tag.weight)
 
