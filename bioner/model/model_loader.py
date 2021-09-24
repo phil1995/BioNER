@@ -21,7 +21,7 @@ class DATEXISNERLayerConfiguration(LayerConfiguration):
         self.out_features = out_features
 
 
-class DATEXISNERStackedBiLSTMLayerConfiguration(LayerConfiguration):
+class DATEXISNERStackedBiLSTMLayerConfiguration(DATEXISNERLayerConfiguration):
     def __init__(self, input_vector_size: int,
                  feedforward_layer_size: int = 150,
                  lstm_layer_size: int = 20,
