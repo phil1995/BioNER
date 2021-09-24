@@ -80,8 +80,10 @@ class StackedBiLSTMModel(Module):
                            bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
         self.additional_biLSTM_layers = []
         for i in range(0, additional_bilstm_layer):
-            self.biLSTM_stack.append(LSTM(input_size=lstm_layer_size * 2,
-                                          bidirectional=True, hidden_size=lstm_layer_size, batch_first=True))
+            self.additional_biLSTM_layers.append(LSTM(input_size=lstm_layer_size * 2,
+                                                      bidirectional=True,
+                                                      hidden_size=lstm_layer_size,
+                                                      batch_first=True))
         self.encoderLSTM = LSTM(input_size=lstm_layer_size * 2, hidden_size=lstm_layer_size, batch_first=True)
         self.hidden2tag = Linear(in_features=lstm_layer_size, out_features=out_features)
         self.init_weights()
@@ -110,7 +112,8 @@ class StackedBiLSTMModel(Module):
         x = F.relu(x)
         x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
         bi_lstm_out, (h, c) = self.biLSTM(x)
-        bi_lstm_out, (h, c) = self.biLSTM2(bi_lstm_out)
+        for additional_biLSTM_layer in self.additional_biLSTM_layers:
+            bi_lstm_out, (h, c) = additional_biLSTM_layer(bi_lstm_out)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
         lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True)
         tag_space = self.hidden2tag(lstm_out)
