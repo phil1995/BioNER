@@ -71,6 +71,10 @@ if __name__ == '__main__':
                                 type=int,
                                 help='The amount of additional BiLSTM layers (stacked)',
                                 required=False)
+    required_named.add_argument('--dropoutProbability',
+                                type=float,
+                                help='The dropout probability, should be between 0.0 and 1.0',
+                                required=False)
     args = parser.parse_args()
 
     encoder = fasttext.load_model(args.embeddings)

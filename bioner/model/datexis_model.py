@@ -1,7 +1,7 @@
 import math
 
 from torch import Tensor
-from torch.nn import Linear, LSTM, Module, init, ModuleList
+from torch.nn import Linear, LSTM, Module, init, ModuleList, Dropout
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
@@ -65,16 +65,20 @@ class StackedBiLSTMModel(Module):
                  additional_bilstm_layer: int = 1,
                  feedforward_layer_size: int = 150,
                  lstm_layer_size: int = 20,
-                 out_features: int = 3):
+                 out_features: int = 3,
+                 dropout_probability: float = 0):
         super().__init__()
 
         print(
             f"Initialize StackedBiLSTMModel Network: Input Vector Size:{input_vector_size} "
             f"Feedforward Layer Size:{feedforward_layer_size} "
             f"LSTM Layer Size:{lstm_layer_size} "
-            f"Out Feature Size:{out_features}"
-            f"# Stacked BiLSTMs:{additional_bilstm_layer}")
+            f"Out Feature Size:{out_features} "
+            f"# Stacked BiLSTMs:{additional_bilstm_layer}"
+            f"# Dropout prob.:{dropout_probability}")
         assert additional_bilstm_layer >= 0
+        assert dropout_probability >= 0 <= 1.0
+        self.dropout = Dropout(p=dropout_probability)
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
         self.biLSTM = LSTM(input_size=feedforward_layer_size,
                            bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
@@ -109,11 +113,16 @@ class StackedBiLSTMModel(Module):
 
     def forward(self, x, lengths):
         x = self.ff1(x)
+        x = self.dropout(x)
         x = F.relu(x)
         x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
         bi_lstm_out, (h, c) = self.biLSTM(x)
+        bi_lstm_out = self.dropout_pack_padded_sequence(sequence=bi_lstm_out,
+                                                        lengths=lengths)
         for additional_biLSTM_layer in self.additional_biLSTM_layers:
             bi_lstm_out, (h, c) = additional_biLSTM_layer(bi_lstm_out)
+            bi_lstm_out = self.dropout_pack_padded_sequence(sequence=bi_lstm_out,
+                                                            lengths=lengths)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
         lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True)
         tag_space = self.hidden2tag(lstm_out)
@@ -121,3 +130,16 @@ class StackedBiLSTMModel(Module):
         # see: https://discuss.pytorch.org/t/loss-function-and-lstm-dimension-issues/79291
         permuted_tag_space = tag_space.permute(0, 2, 1)
         return permuted_tag_space
+
+    def dropout_pack_padded_sequence(self, sequence, lengths):
+        """
+        Applies dropout to a pack_padded_sequence.
+        As it's not possible to directly use a pack_padded_sequence as input for a dropout layer, we need to transform
+        it first into a pad_packed_sequence and afterwards re-transform it again into a pack_padded_sequence.
+        :param sequence: the pack_padded_sequence
+        :param lengths: the lengths passed to the pack_padded_sequence
+        :return:
+        """
+        x, _ = pad_packed_sequence(sequence, batch_first=True)
+        x = self.dropout(x)
+        return pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
