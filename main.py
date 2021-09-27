@@ -73,6 +73,7 @@ if __name__ == '__main__':
                                 required=False)
     required_named.add_argument('--dropoutProbability',
                                 type=float,
+                                default=0,
                                 help='The dropout probability, should be between 0.0 and 1.0',
                                 required=False)
     args = parser.parse_args()
