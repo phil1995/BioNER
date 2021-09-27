@@ -103,8 +103,8 @@ def annotate_dataset_with_bioner(dataset_file_path, encoder: _FastText, model_pa
 
 def current_best_bioner_model_configuration():
     return DATEXISNERStackedBiLSTMLayerConfiguration(input_vector_size=300,
-                                                     feedforward_layer_size=220,
-                                                     lstm_layer_size=10,
+                                                     feedforward_layer_size=2048,
+                                                     lstm_layer_size=2048,
                                                      amount_of_stacked_bilstm_layer=1,
                                                      dropout_probability=0.0)
 
