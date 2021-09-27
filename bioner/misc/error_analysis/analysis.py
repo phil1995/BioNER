@@ -179,6 +179,7 @@ def main():
         scibert_annotated_dataset = annotate_dataset_with_scibert(dataset_file_path=dataset_path,
                                                                   contextual_ner_path=args.sciBERT)
         scibert_analysis = analysis.compare_to(other_dataset=scibert_annotated_dataset)
+        scibert_analysis.name = "SciBERT"
         all_analyses.append(scibert_analysis)
 
     ErrorAnalysis.export_to_csv(error_analysis_objects=all_analyses,
