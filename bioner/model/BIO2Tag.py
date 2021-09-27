@@ -6,6 +6,9 @@ class BIO2Tag(Enum):
     INSIDE = "I"
     OUTSIDE = "O"
 
+    def __str__(self):
+        return str(self.value)
+
     @classmethod
     def get_index(cls, type):
         return list(cls).index(type)

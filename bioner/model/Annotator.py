@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from os.path import join
 from typing import Optional, Sequence, Dict
 
@@ -16,7 +17,8 @@ from bioner.model.BiLSTM import BiLSTM
 from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.datexis_model import DATEXISModel
-from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall
+from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall, \
+    _create_BIO2_labels_from_batch_indices
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # use ignore_index so that the padded outputs do not contribute to the input gradient when using CrossEntropyLoss
@@ -272,3 +274,31 @@ class Annotator:
     def attach_metrics(metrics: Dict[str, Metric], engine: Engine):
         for name, metric in metrics.items():
             metric.attach(engine, name)
+
+    @staticmethod
+    def annotate_dataset(dataset: CoNLLDataset, model: nn.Module):
+        all_predicted_labels = []
+        model.eval()
+        with torch.no_grad():
+            data_loader = MedMentionsDataLoader(dataset=dataset, shuffle=False, num_workers=0,
+                                                batch_size=1, collate_fn=collate_batch)
+            for batch in data_loader:
+                x, y, original_lengths = batch
+                y_pred = model(x, original_lengths)
+                predicted_batch_indices = torch.argmax(y_pred, dim=1)
+                predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices,
+                                                                          ignore_index=ignore_label_index)
+                for predicted_sentence_labels in predicted_labels:
+                    all_predicted_labels.append(predicted_sentence_labels)
+        annotated_dataset = deepcopy(dataset)
+        i = 0
+        for doc_index, document in enumerate(dataset.documents):
+            for sentence_index, sentence in enumerate(document.sentences):
+                predicted_labels = all_predicted_labels[i]
+                for token_index, label in enumerate(predicted_labels):
+                    document_to_annotate = annotated_dataset.documents[doc_index]
+                    sentence_to_annotate = document_to_annotate.sentences[sentence_index]
+                    token = sentence_to_annotate.tokens[token_index]
+                    token.tag = label
+                i += 1
+        return annotated_dataset
