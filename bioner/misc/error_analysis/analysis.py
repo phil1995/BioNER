@@ -21,7 +21,9 @@ class ErrorAnalysis:
     def __init__(self, gold_standard_dataset: CoNLLDataset, dataset: CoNLLDataset, name: Optional[str] = ""):
         self.error_indices = set()
         self.perfect_indices = set()
+        gold_standard_dataset.flatten_dataset()
         self.gold_standard_dataset = gold_standard_dataset
+        dataset.flatten_dataset()
         self.dataset = dataset
         self.name = name
 
@@ -110,8 +112,6 @@ def current_best_bioner_model_configuration():
 
 
 def select_errors(gold_standard_dataset: CoNLLDataset, dataset: CoNLLDataset, n: int = 100, seed: int = 1632737901):
-    gold_standard_dataset.flatten_dataset()
-    dataset.flatten_dataset()
     analysis = ErrorAnalysis(gold_standard_dataset=gold_standard_dataset,
                              dataset=dataset,
                              name="BioNER")
