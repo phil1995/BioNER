@@ -278,6 +278,7 @@ class Annotator:
     @staticmethod
     def annotate_dataset(dataset: CoNLLDataset, model: nn.Module):
         all_predicted_labels = []
+        model.to(device)
         model.eval()
         with torch.no_grad():
             data_loader = MedMentionsDataLoader(dataset=dataset, shuffle=False, num_workers=0,
