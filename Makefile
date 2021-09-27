@@ -148,19 +148,20 @@ train-all-custom-stacked-DATEXIS:
 
 train-custom-stacked-DATEXIS:
 	# Pass the ngrams parameter, e.g. make train ngrams=3-6
-	mkdir -p $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)/tensorboard_logs  && \
+	mkdir -p $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)_dropout=$(dropout)/tensorboard_logs  && \
 	$(python_path) $(main_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)/ \
+	--modelOutputFolder $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)_dropout=$(dropout)/ \
 	--batchSize $(batch_size) \
 	--maxEpochs $(max_epochs) \
 	--numWorkers $(num_workers) \
 	--learningRate $(learning_rate) \
-	--trainingsLogFile $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)/training.log \
-	--tensorboardLogDirectory $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)/tensorboard_logs \
+	--trainingsLogFile $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)_dropout=$(dropout)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)_additional_bilstm_layers=$(additional_bilstm_layers)_dropout=$(dropout)/tensorboard_logs \
 	--model CustomConfig_Stacked-DATEXIS-NER \
 	--ff1 $(ff) \
 	--lstm1 $(lstm) \
-	--additionalBiLSTMLayers $(additional_bilstm_layers)
+	--additionalBiLSTMLayers $(additional_bilstm_layers) \
+	--dropoutProbability $(dropout)
