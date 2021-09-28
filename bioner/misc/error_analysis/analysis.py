@@ -35,7 +35,7 @@ class ErrorAnalysis:
         true_positives = count_true_positives(gold_standard_annotations=gold_standard_annotations,
                                               predicted_annotations=predicted_annotations)
 
-        if true_positives == len(gold_standard_annotations):
+        if true_positives == len(gold_standard_annotations) == len(predicted_annotations):
             self.perfect_indices.add(sentence_index)
         else:
             self.error_indices.add(sentence_index)
