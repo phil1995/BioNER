@@ -1,3 +1,4 @@
+from __future__ import annotations
 import csv
 import itertools as it
 
@@ -113,3 +114,15 @@ class CoNLLDataset(Dataset):
             encodings.append(token.encoding)
             tags.append(BIO2Tag.get_index(token.tag))
         return encodings, tags
+
+    @staticmethod
+    def write_dataset_to_file(dataset: CoNLLDataset, file_path: str):
+        with open(file_path, 'w', encoding='utf8') as output_file:
+            for document in dataset.documents:
+                output_file.write("-DOCSTART-	0	0	O\n")
+                output_file.write("\n")
+                for sentence in document.sentences:
+                    for token in sentence.tokens:
+                        token_str = f"{token.text}\t{token.start}\t{token.end}\t{token.tag.value}"
+                        output_file.write(token_str + "\n")
+                    output_file.write("\n")

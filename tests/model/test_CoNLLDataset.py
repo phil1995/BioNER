@@ -3,6 +3,7 @@ from bioner.model.Document import Document
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.Sentence import Sentence
 from bioner.model.Token import Token
+import filecmp
 
 
 def test_read_documents_empty_lines_at_the_end(tmpdir):
@@ -47,6 +48,18 @@ def test_flatten_documents(tmpdir):
     assert expected_sentences == dataset.sentences
 
 
+def test_write_dataset_to_file(tmpdir):
+    file_path = tmpdir.join("test_CoNLL_file.txt")
+    content = create_test_document_content_without_types()
+    with open(file_path, "w") as text_file:
+        text_file.write(content)
+    dataset = CoNLLDataset(file_path, encoder=None)
+    output_file_path = tmpdir.join("output_test_CoNLL_file.txt")
+    CoNLLDataset.write_dataset_to_file(dataset=dataset, file_path=output_file_path)
+
+    assert filecmp.cmp(file_path, output_file_path)
+
+
 # Helper
 def create_test_document_content() -> str:
     return """-DOCSTART-	0	0	O
@@ -68,6 +81,30 @@ et	9	10	O
 dolore	0	5	O
 magna	6	8	O
 aliquyam	9	10	O
+"""
+
+
+def create_test_document_content_without_types() -> str:
+    return """-DOCSTART-	0	0	O
+
+Lorem	0	5	B
+ipsum	6	10	I
+dolor	11	16	O
+
+Eirmod	0	5	B
+tempor	6	8	O
+.	9	10	O
+
+-DOCSTART-	0	0	O
+
+ut	0	5	B
+labore	6	8	O
+et	9	10	O
+
+dolore	0	5	O
+magna	6	8	O
+aliquyam	9	10	O
+
 """
 
 
