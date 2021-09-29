@@ -111,8 +111,9 @@ class Annotation:
 
     def __eq__(self, other):
         if isinstance(other, Annotation):
-            return self.sentence_id == other.sentence_id and self.start_token_id == other.start_token_id \
-                   and self.end_token_id == other.end_token_id
+            return self.start_token_id == other.start_token_id \
+                   and self.end_token_id == other.end_token_id \
+                   and self.sentence_id == other.sentence_id
         return False
 
 
