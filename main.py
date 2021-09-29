@@ -1,4 +1,6 @@
 import argparse
+import random
+
 import torch
 import fasttext
 from torch import optim
@@ -56,8 +58,8 @@ if __name__ == '__main__':
                                 required=False)
     required_named.add_argument('--model',
                                 type=str,
-                                help='The name of the model you want to use. Possible options: [DATEXIS-NER,'
-                                     ' CustomConfig_DATEXIS-NER]',
+                                help='The name of the model you want to use. Possible options: [DATEXIS-NER, '
+                                     'CustomConfig_DATEXIS-NER]',
                                 required=True),
     required_named.add_argument('--ff1',
                                 type=int,
@@ -77,6 +79,11 @@ if __name__ == '__main__':
                                 help='The dropout probability, should be between 0.0 and 1.0',
                                 required=False)
     args = parser.parse_args()
+
+    # Reproducibility
+    torch.use_deterministic_algorithms(True)
+    torch.manual_seed(1632737901)
+    random.seed(1632737901)
 
     encoder = fasttext.load_model(args.embeddings)
     layer_configuration = LayerConfigurationCreator.create_layer_configuration(input_vector_size=encoder.get_dimension(),

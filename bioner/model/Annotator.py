@@ -100,8 +100,23 @@ class Annotator:
                                                        batch_size=parameters.batch_size, collate_fn=collate_batch)
         precision = EntityLevelPrecision()
         recall = EntityLevelRecall()
+
+        def deterministic_cross_entropy_loss(y_pred, y,):
+            """
+            CrossEntropyLoss does not have a deterministic implementation for CUDA.
+            For more details:  https://github.com/pytorch/pytorch/issues/46024
+
+            Therefore, we calculate the CrossEntropyLoss on the CPU and move the tensor back to the default device
+            afterwards.
+            """
+            y_pred = y_pred.to('cpu')
+            y = y.to('cpu')
+            loss = criterion(y_pred, y)
+            loss = loss.to(device)
+            return loss
+
         metrics = {"Precision": precision, "Recall": recall,
-                   "F1": (precision * recall * 2 / (precision + recall + 1e-20)).mean(), "loss": Loss(criterion)}
+                   "F1": (precision * recall * 2 / (precision + recall + 1e-20)).mean(), "loss": Loss(deterministic_cross_entropy_loss)}
 
         train_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
         validation_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
@@ -247,8 +262,13 @@ class Annotator:
             model.train()
             optimizer.zero_grad()
             x, y, original_lengths = batch  # prepare_batch(batch)
+
             y_pred = model(x, original_lengths)
+            # Fix for non-deterministic CrossEntropyLoss on GPU
+            y_pred = y_pred.to('cpu')
+            y = y.to('cpu')
             loss = criterion(y_pred, y)
+            loss = loss.to(device)
             loss.backward()
             optimizer.step()
             return loss.item()
