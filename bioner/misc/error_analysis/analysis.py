@@ -135,7 +135,7 @@ def calc_overlapping_statistics(analysis_1: ErrorAnalysis, analysis_2: ErrorAnal
     return OverlappingStatisticResult(true_positives=len(overlapping_true_positives),
                                       false_positives=len(overlapping_false_positives),
                                       false_negatives=len(overlapping_false_negatives),
-                                      name=f"{analysis_1} - {analysis_2}")
+                                      name=f"{analysis_1.name} - {analysis_2.name}")
 
 
 class ErrorStatistics:
@@ -269,7 +269,7 @@ def main():
         print(f"Overlapping Results for: {overlapping_result.name}\n"
               f"TP: {overlapping_result.true_positives} ({overlapping_result.true_positives / len(automatic_bioner_error_analysis.true_positive_annotations)}%)\n"
               f"FP: {overlapping_result.false_positives} ({overlapping_result.false_positives / len(automatic_bioner_error_analysis.false_positive_annotations)}%)\n"
-              f"FN: {overlapping_result.false_negatives} ({overlapping_result.false_negatives / len(automatic_bioner_error_analysis.false_negative_annotations)}%")
+              f"FN: {overlapping_result.false_negatives} ({overlapping_result.false_negatives / len(automatic_bioner_error_analysis.false_negative_annotations)}%)")
 
     ManualErrorAnalysis.export_to_csv(error_analysis_objects=all_analyses,
                                       output_file_path=args.outputFile)

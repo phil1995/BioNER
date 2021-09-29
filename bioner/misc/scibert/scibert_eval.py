@@ -116,8 +116,7 @@ class SciBERTNER:
     def annotate_to_file(self, dataset_file_path: str, output_file_path: str):
         dataset = CoNLLDataset(data_file_path=dataset_file_path, encoder=None)
         annotated_dataset = self.annotate(dataset=dataset)
-        write_dataset_to_conll_file(dataset=dataset, annotated_dataset=annotated_dataset,
-                                    file_path=output_file_path)
+        CoNLLDataset.write_dataset_to_file(dataset=annotated_dataset, file_path=output_file_path)
 
 
 def create_bio2_tags_from_bioul_tags(tags: [str]) -> [BIO2Tag]:
