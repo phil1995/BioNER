@@ -7,12 +7,9 @@ from bioner.model.CoNLLDataset import CoNLLDataset
 
 
 def test_export_to_csv(tmpdir):
-    file_path = tmpdir.join("test_CoNLL_file.txt")
     output_file_path = tmpdir.join("output.csv")
-    content = create_test_document_content()
-    with open(file_path, "w") as text_file:
-        text_file.write(content)
-    gold_dataset = CoNLLDataset(file_path, encoder=None)
+
+    gold_dataset = create_gold_dataset(tmpdir)
     annotated_dataset = deepcopy(gold_dataset)
 
     # Introduce error: tag "ipsum" as outside
@@ -46,7 +43,6 @@ def test_export_to_csv(tmpdir):
             assert line == expected_lines[index]
 
 
-
 # TODO: Refactor Helper --> Duplicate!
 # Helper
 def create_test_document_content() -> str:
@@ -70,3 +66,11 @@ dolore	0	5	O
 magna	6	8	O
 aliquyam	9	10	O
 """
+
+
+def create_gold_dataset(tmpdir) -> CoNLLDataset:
+    file_path = tmpdir.join("test_CoNLL_file.txt")
+    content = create_test_document_content()
+    with open(file_path, "w") as text_file:
+        text_file.write(content)
+    return CoNLLDataset(file_path, encoder=None)
