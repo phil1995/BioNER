@@ -1,7 +1,7 @@
 import unittest
 from copy import deepcopy
 
-from bioner.misc.error_analysis.analysis import select_errors, ErrorAnalysis
+from bioner.misc.error_analysis.analysis import select_errors, ErrorAnalysis, ErrorStatistics
 from bioner.model.BIO2Tag import BIO2Tag
 from bioner.model.CoNLLDataset import CoNLLDataset
 
@@ -42,6 +42,23 @@ def test_export_to_csv(tmpdir):
         for index, line in enumerate(exported_csv):
             assert line == expected_lines[index]
 
+
+def test_annotation_length_error_statistics(tmpdir):
+    gold_dataset = create_gold_dataset(tmpdir)
+
+    annotated_dataset = deepcopy(gold_dataset)
+
+    # Introduce error: tag "ipsum" as outside
+    annotated_dataset.documents[0].sentences[0].tokens[1].tag = BIO2Tag.OUTSIDE
+
+    # Check that gold_dataset has still the correct tag
+    assert gold_dataset.documents[0].sentences[0].tokens[1].tag == BIO2Tag.INSIDE
+
+    error_statistic = ErrorStatistics(gold_standard_dataset=gold_dataset)
+    statistic_result = error_statistic.calc_error_stats_for_lengths(annotated_dataset)
+
+    assert statistic_result.errors == {2: 1}
+    assert statistic_result.total_annotations == {1: 2, 2: 1}
 
 # TODO: Refactor Helper --> Duplicate!
 # Helper

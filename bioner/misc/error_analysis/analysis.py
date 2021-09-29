@@ -2,6 +2,7 @@ from __future__ import annotations
 import argparse
 import csv
 import random
+from collections import defaultdict
 from typing import Optional, TextIO
 
 import fasttext
@@ -85,6 +86,33 @@ class ErrorAnalysis:
     def write_tag_line_to_file(csv_writer: csv.writer, name_column: str, error_column: int, tags: [BIO2Tag]):
         line = [name_column, error_column] + tags
         csv_writer.writerow(line)
+
+
+class ErrorStatisticResult:
+    def __init__(self):
+        self.errors = defaultdict(lambda: 0)
+        self.total_annotations = defaultdict(lambda: 0)
+
+
+class ErrorStatistics:
+    def __init__(self, gold_standard_dataset: CoNLLDataset):
+        gold_standard_dataset.flatten_dataset()
+        self.gold_standard_dataset = gold_standard_dataset
+
+    def calc_error_stats_for_lengths(self, dataset: CoNLLDataset) -> ErrorStatisticResult:
+        dataset.flatten_dataset()
+        result = ErrorStatisticResult()
+        for sentence_index, sentence in enumerate(self.gold_standard_dataset.sentences):
+            predicted_labels = [token.tag for token in dataset.sentences[sentence_index]]
+            gold_standard_labels = [token.tag for token in sentence]
+            predicted_annotations = convert_labeled_tokens_to_annotations([predicted_labels])
+            gold_standard_annotations = convert_labeled_tokens_to_annotations([gold_standard_labels])
+
+            for annotation in gold_standard_annotations:
+                result.total_annotations[len(annotation)] += 1
+                if annotation not in predicted_annotations:
+                    result.errors[len(annotation)] += 1
+        return result
 
 
 def annotate_dataset_with_scibert(dataset_file_path, contextual_ner_path: str):

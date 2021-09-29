@@ -116,6 +116,9 @@ class Annotation:
                    and self.sentence_id == other.sentence_id
         return False
 
+    def __len__(self):
+        return self.end_token_id - self.start_token_id + 1
+
 
 def _create_BIO2_labels_from_batch_indices(indices_batch: [[int]], ignore_index: int) -> [[BIO2Tag]]:
     batch_labels = []
