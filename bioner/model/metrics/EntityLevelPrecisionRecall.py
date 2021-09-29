@@ -119,6 +119,9 @@ class Annotation:
     def __len__(self):
         return self.end_token_id - self.start_token_id + 1
 
+    def __hash__(self):
+        return hash((self.sentence_id, self.start_token_id, self.end_token_id))
+
 
 def _create_BIO2_labels_from_batch_indices(indices_batch: [[int]], ignore_index: int) -> [[BIO2Tag]]:
     batch_labels = []
