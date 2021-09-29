@@ -50,7 +50,7 @@ def main():
         path=args.embeddings)
     bioner_annotated_dataset = annotate_dataset_with_bioner(
         dataset_file_path=args.dataset,
-        model_path=args.bioNER,
+        model_path=args.model,
         encoder=encoder)
     CoNLLDataset.write_dataset_to_file(dataset=bioner_annotated_dataset, file_path=args.outputFile)
 
