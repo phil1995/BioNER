@@ -1,9 +1,11 @@
 import unittest
 from copy import deepcopy
 
-from bioner.misc.error_analysis.analysis import select_errors, ErrorAnalysis, ErrorStatistics
+from bioner.misc.error_analysis.analysis import select_errors, ManualErrorAnalysis, ErrorStatistics, ErrorAnalysis, \
+    calc_overlapping_statistics
 from bioner.model.BIO2Tag import BIO2Tag
 from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.metrics.EntityLevelPrecisionRecall import Annotation
 
 
 def test_export_to_csv(tmpdir):
@@ -19,7 +21,7 @@ def test_export_to_csv(tmpdir):
     assert gold_dataset.documents[0].sentences[0].tokens[1].tag == BIO2Tag.INSIDE
 
     analysis = select_errors(gold_standard_dataset=gold_dataset, dataset=annotated_dataset, seed=1632737901)
-    ErrorAnalysis.export_to_csv(error_analysis_objects=[analysis], output_file_path=output_file_path)
+    ManualErrorAnalysis.export_to_csv(error_analysis_objects=[analysis], output_file_path=output_file_path)
 
     expected_lines = ['Text,-1,Lorem,ipsum,dolor\n',
                       'Gold Standard,-1,B,I,O\n',
@@ -59,6 +61,58 @@ def test_annotation_length_error_statistics(tmpdir):
 
     assert statistic_result.errors == {2: 1}
     assert statistic_result.total_annotations == {1: 2, 2: 1}
+
+
+def test_error_analysis_annotations(tmpdir):
+    gold_dataset = create_gold_dataset(tmpdir)
+
+    annotated_dataset = deepcopy(gold_dataset)
+
+    # Introduce error: tag "ipsum" as outside
+    annotated_dataset.documents[0].sentences[0].tokens[1].tag = BIO2Tag.OUTSIDE
+
+    # Check that gold_dataset has still the correct tag
+    assert gold_dataset.documents[0].sentences[0].tokens[1].tag == BIO2Tag.INSIDE
+
+    error_analysis = ErrorAnalysis(gold_standard_dataset=gold_dataset, dataset=annotated_dataset)
+    assert len(error_analysis.false_negative_annotations) == 0
+    assert len(error_analysis.false_positive_annotations) == 0
+    assert len(error_analysis.true_positive_annotations) == 0
+
+    error_analysis.analyze_annotations()
+
+    assert error_analysis.false_negative_annotations == [Annotation(sentence_id=0, start_token_id=0, end_token_id=1)]
+    assert error_analysis.false_positive_annotations == [Annotation(sentence_id=0, start_token_id=0, end_token_id=0)]
+    assert error_analysis.true_positive_annotations == [Annotation(sentence_id=1, start_token_id=0, end_token_id=0),
+                                                        Annotation(sentence_id=2, start_token_id=0, end_token_id=0)]
+
+
+def test_error_analysis_overlapping(tmpdir):
+    gold_dataset = create_gold_dataset(tmpdir)
+
+    annotated_dataset_1 = deepcopy(gold_dataset)
+
+    # Introduce error: tag "ipsum" as outside
+    annotated_dataset_1.documents[0].sentences[0].tokens[1].tag = BIO2Tag.OUTSIDE
+
+    annotated_dataset_2 = deepcopy(annotated_dataset_1)
+
+    # Introdcue another error: tag "ut" as outside
+    annotated_dataset_2.documents[1].sentences[0].tokens[0].tag = BIO2Tag.OUTSIDE
+
+    # Check that gold_dataset has still the correct tag
+    assert gold_dataset.documents[0].sentences[0].tokens[1].tag == BIO2Tag.INSIDE
+
+    error_analysis_1 = ErrorAnalysis(gold_standard_dataset=gold_dataset, dataset=annotated_dataset_1)
+    error_analysis_1.analyze_annotations()
+    error_analysis_2 = ErrorAnalysis(gold_standard_dataset=gold_dataset, dataset=annotated_dataset_2)
+    error_analysis_2.analyze_annotations()
+    result = calc_overlapping_statistics(analysis_1=error_analysis_1,
+                                         analysis_2=error_analysis_2)
+    assert result.true_positives == 1
+    assert result.false_negatives == 1
+    assert result.false_positives == 1
+
 
 # TODO: Refactor Helper --> Duplicate!
 # Helper
