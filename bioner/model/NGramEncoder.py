@@ -1,8 +1,9 @@
+from collections import defaultdict
+
 import regex
 
 import numpy as np
-import torch
-from pydantic.fields import defaultdict
+
 
 from bioner.model.CoNLLDataset import CoNLLDataset
 
