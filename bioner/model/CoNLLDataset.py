@@ -1,6 +1,7 @@
 from __future__ import annotations
 import csv
 import itertools as it
+from typing import Optional
 
 from fasttext.FastText import _FastText
 from torch.utils.data import Dataset
@@ -26,11 +27,11 @@ class CoNLLDataset(Dataset):
     """
     DOC_START = "-DOCSTART-"
 
-    def __init__(self, data_file_path: str, encoder: _FastText):
-        self.documents = self.read_documents(data_file_path, encoder)
+    def __init__(self, data_file_path: str):
+        self.documents = self.read_documents(data_file_path)
         self.sentences = None
 
-    def read_documents(self, data_file_path: str, encoder: _FastText):
+    def read_documents(self, data_file_path: str):
         documents = []
         with open(data_file_path, 'r', encoding='utf8') as input_file:
             # Treat every character literally (including quotes).
@@ -57,8 +58,6 @@ class CoNLLDataset(Dataset):
                         else:
                             for raw_token in sentence_row:
                                 token = self.create_annotated_token_from_row(raw_token)
-                                if encoder:
-                                    token = self.create_encoded_token_from_token(token, encoder=encoder)
                                 current_tokens.append(token)
                     if current_tokens:
                         sentence = Sentence(tokens=current_tokens)

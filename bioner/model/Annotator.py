@@ -5,7 +5,6 @@ from typing import Optional, Sequence, Dict
 
 import numpy as np
 import torch
-from fasttext.FastText import _FastText
 from ignite.contrib.handlers import TensorboardLogger, ProgressBar
 from ignite.engine import Engine, Events, create_supervised_evaluator, State
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
@@ -14,6 +13,7 @@ from ignite.utils import setup_logger
 from torch import optim, nn
 
 from bioner.model.BiLSTM import BiLSTM
+from bioner.model.Encoder import Encoder
 from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.datexis_model import DATEXISModel
@@ -50,7 +50,7 @@ def collate_batch(batch):
 
 
 class TrainingParameters:
-    def __init__(self, encoder: _FastText, training_dataset_path: str, validation_dataset_path: str,
+    def __init__(self, encoder: Encoder, training_dataset_path: str, validation_dataset_path: str,
                  model: nn.Module, model_save_path: str, optimizer: optim,
                  batch_size: int, max_epochs: int, num_workers: int = 0,
                  test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
@@ -178,9 +178,9 @@ class Annotator:
                            num_workers=parameters.num_workers)
 
     @staticmethod
-    def test(encoder: _FastText, test_dataset_path: str, best_model_state_path: str, num_workers: int = 0):
+    def test(encoder: Encoder, test_dataset_path: str, best_model_state_path: str, num_workers: int = 0):
         print(f"Start test on: {test_dataset_path}")
-        model = Annotator.create_model(input_vector_size=encoder.get_dimension())
+        model = Annotator.create_model(input_vector_size=encoder.get_embeddings_vector_size())
         model.load_state_dict(torch.load(best_model_state_path))
         test_dataset = Annotator.load_dataset(path=test_dataset_path, encoder=encoder)
         test_data_loader = MedMentionsDataLoader(dataset=test_dataset, shuffle=False, num_workers=num_workers,
@@ -213,8 +213,9 @@ class Annotator:
 
     @staticmethod
     def load_dataset(path, encoder) -> CoNLLDataset:
-        structured_dataset = CoNLLDataset(path, encoder=encoder)
-        return structured_dataset
+        dataset = CoNLLDataset(path)
+        encoder.encode(dataset)
+        return dataset
 
     @staticmethod
     def create_model(input_vector_size: int, feedforward_layer_size: int = 512, lstm_layer_size: int = 256) -> BiLSTM:

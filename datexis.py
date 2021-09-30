@@ -2,21 +2,18 @@ import argparse
 import random
 
 import torch
-import fasttext
 from torch import optim
 
-from bioner.model.Annotator import Annotator, TrainingParameters
-from bioner.model.FasttextEncoder import FasttextEncoder
-from bioner.model.model_loader import ModelLoader, LayerConfigurationCreator
+from bioner.model.Annotator import TrainingParameters, Annotator
+from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.DATEXISEncoder import DATEXISEncoder
+from bioner.model.model_loader import DATEXISNERLayerConfiguration, ModelLoader
 
-if __name__ == '__main__':
+
+def main():
     torch.multiprocessing.set_start_method('spawn')
-    parser = argparse.ArgumentParser(description='Train Annotator')
+    parser = argparse.ArgumentParser(description='Train DATEXIS-NER')
     required_named = parser.add_argument_group('required named arguments')
-    required_named.add_argument('--embeddings',
-                                type=str,
-                                help='Path to the embeddings file',
-                                required=True)
     required_named.add_argument('--training',
                                 type=str,
                                 help='Path to the training dataset file',
@@ -57,28 +54,6 @@ if __name__ == '__main__':
                                 type=str,
                                 help='The file path where to log the PyTorch Ignite training and validation',
                                 required=False)
-    required_named.add_argument('--model',
-                                type=str,
-                                help='The name of the model you want to use. Possible options: [DATEXIS-NER, '
-                                     'CustomConfig_DATEXIS-NER]',
-                                required=True),
-    required_named.add_argument('--ff1',
-                                type=int,
-                                help='The layer size of the first feed forward layer',
-                                required=False)
-    required_named.add_argument('--lstm1',
-                                type=int,
-                                help='The layer size of the first LSTM layer',
-                                required=False)
-    required_named.add_argument('--additionalBiLSTMLayers',
-                                type=int,
-                                help='The amount of additional BiLSTM layers (stacked)',
-                                required=False)
-    required_named.add_argument('--dropoutProbability',
-                                type=float,
-                                default=0,
-                                help='The dropout probability, should be between 0.0 and 1.0',
-                                required=False)
     args = parser.parse_args()
 
     # Reproducibility
@@ -86,10 +61,11 @@ if __name__ == '__main__':
     torch.manual_seed(1632737901)
     random.seed(1632737901)
 
-    encoder = FasttextEncoder(embeddings_file_path=args.embeddings)
-    layer_configuration = LayerConfigurationCreator.create_layer_configuration(input_vector_size=encoder.get_embeddings_vector_size(),
-                                                                               args=args)
-    model = ModelLoader.load_model(name=args.model,
+    encoder = DATEXISEncoder()
+    training_dataset = CoNLLDataset(data_file_path=args.training)
+    encoder.learn_trigram_encoding(training_dataset)
+    layer_configuration = DATEXISNERLayerConfiguration(input_vector_size=encoder.get_embeddings_vector_size())
+    model = ModelLoader.load_model(name="DATEXIS-NER",
                                    layer_configuration=layer_configuration)
     parameters = TrainingParameters(encoder=encoder,
                                     batch_size=args.batchSize,
@@ -104,3 +80,7 @@ if __name__ == '__main__':
                                     optimizer=optim.Adam(model.parameters(), lr=args.learningRate),
                                     model=model)
     Annotator.train(parameters)
+
+
+if __name__ == "__main__":
+    main()
