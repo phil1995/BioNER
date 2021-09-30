@@ -80,8 +80,7 @@ class Annotator:
 
     @staticmethod
     def train(parameters: TrainingParameters):
-        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs} "
-              f"on {parameters.training_dataset_path}")
+
         encoder = parameters.encoder
         model = parameters.model
         model = model.to(device)
@@ -166,6 +165,8 @@ class Annotator:
         ProgressBar(persist=False, desc="Validation Evaluation").attach(validation_evaluator)
 
         # Start the training
+        print(f"Start training with batch size:{parameters.batch_size} max.Epochs:{parameters.max_epochs} "
+              f"on {parameters.training_dataset_path}")
         trainer.run(training_data_loader, max_epochs=parameters.max_epochs)
 
         # Close Tensorboard Logger (if available)
@@ -216,7 +217,9 @@ class Annotator:
     @staticmethod
     def load_dataset(path, encoder) -> CoNLLDataset:
         dataset = CoNLLDataset(path)
+        print(f"Start encoding dataset: {path}")
         encoder.encode(dataset)
+        print(f"Finished encoding dataset: {path}")
         return dataset
 
     @staticmethod
