@@ -54,7 +54,8 @@ class TrainingParameters:
                  model: nn.Module, model_save_path: str, optimizer: optim,
                  batch_size: int, max_epochs: int, num_workers: int = 0,
                  test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
-                 training_log_file_path: Optional[str] = None):
+                 training_log_file_path: Optional[str] = None,
+                 faster_training_evaluation: Optional[bool] = False):
         self.encoder = encoder
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
@@ -67,6 +68,7 @@ class TrainingParameters:
         self.num_workers = num_workers
         self.tensorboard_log_directory_path = tensorboard_log_directory_path
         self.training_log_file_path = training_log_file_path
+        self.faster_training_evaluation = faster_training_evaluation
 
 
 class TestParameters:
@@ -121,12 +123,17 @@ class Annotator:
         train_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
         validation_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
 
-        @trainer.on(Events.EPOCH_COMPLETED)
-        def compute_metrics(engine):
-            # Evaluate after each training epoch on training and validation dataset
+        @trainer.on(Events.EPOCH_COMPLETED(every=10 if parameters.faster_training_evaluation else 1))
+        def compute_training_metrics(engine):
+            # Evaluate after each training (or every 10th if faster_training_evaluation is enabled) epoch
+            # on training dataset
             Annotator.log_results(epoch=engine.state.epoch,
                                   state=train_evaluator.run(training_data_loader),
                                   logger=train_evaluator.logger)
+
+        @trainer.on(Events.EPOCH_COMPLETED)
+        def compute_metrics(engine):
+            # Evaluate after each training epoch on validation dataset
             Annotator.log_results(epoch=engine.state.epoch,
                                   state=validation_evaluator.run(validation_data_loader),
                                   logger=validation_evaluator.logger)

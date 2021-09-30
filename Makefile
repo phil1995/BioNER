@@ -23,6 +23,7 @@ datexis_path := $(mkfile_dir)datexis.py
 
 additional_bilstm_layers := 1
 
+fast_training_mode_enabled := False
 train-datexis-ner:
 	mkdir -p $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs && \
 	$(python_path) $(datexis_path) \
@@ -89,7 +90,8 @@ train-original:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--model DATEXIS-NER
+	--model DATEXIS-NER \
+	--enableFasterTraining $(fast_training_mode_enabled)
 
 train-all-original-adam:
 	$(MAKE) train-original-adam ngrams=3-3 && \

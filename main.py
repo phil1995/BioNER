@@ -79,6 +79,11 @@ if __name__ == '__main__':
                                 default=0,
                                 help='The dropout probability, should be between 0.0 and 1.0',
                                 required=False)
+    required_named.add_argument('--enableFasterTraining',
+                                type=bool,
+                                default=False,
+                                help='Enable faster training by compute metrics only every 10th epoch',
+                                required=False)
     args = parser.parse_args()
 
     # Reproducibility
@@ -102,5 +107,6 @@ if __name__ == '__main__':
                                     tensorboard_log_directory_path=args.tensorboardLogDirectory,
                                     training_log_file_path=args.trainingsLogFile,
                                     optimizer=optim.Adam(model.parameters(), lr=args.learningRate),
-                                    model=model)
+                                    model=model,
+                                    faster_training_evaluation=args.enableFasterTraining)
     Annotator.train(parameters)
