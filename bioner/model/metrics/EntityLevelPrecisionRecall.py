@@ -169,12 +169,7 @@ def convert_labeled_tokens_to_annotations(labeled_tokens: [[BIO2Tag]]) -> [Annot
 
 
 def count_true_positives(gold_standard_annotations: [Annotation], predicted_annotations: [Annotation]) -> int:
-    result = 0
-    for predicted_annotation in predicted_annotations:
-        if any(gold_standard_annotation == predicted_annotation for gold_standard_annotation in
-               gold_standard_annotations):
-            result += 1
-    return result
+    return len(set(predicted_annotations).intersection(set(gold_standard_annotations)))
 
 
 def filtered_labels(gold_standard_labels, predicted_labels):
