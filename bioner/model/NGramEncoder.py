@@ -2,6 +2,7 @@ import regex
 
 import numpy as np
 import torch
+from pydantic.fields import defaultdict
 
 from bioner.model.CoNLLDataset import CoNLLDataset
 
@@ -10,19 +11,37 @@ def keep_only_printable_chars(input: str) -> str:
     return regex.sub('[^\\p{L}\\p{N}\\p{P}\\p{Sm}\\p{Sc}]', '', input).lower()
 
 
+class Vocabulary:
+    def __init__(self):
+        self.words = defaultdict(lambda: 0)
+
+    def update_word_count(self, word: str):
+        self.words[word] += 1
+
+    def truncate_vocabulary(self, min_word_frequency: int):
+        truncated_words = defaultdict(lambda: 0)
+        for key, value in self.words.items():
+            if value >= min_word_frequency:
+                truncated_words[key] = value
+        self.words = truncated_words
+
+
 class NGramEncoder:
     def __init__(self, n: int):
         self.n = n
         self.words = []
 
     def create_encodings(self, dataset: CoNLLDataset):
-        words = set()
+        vocabulary = Vocabulary()
         for document in dataset.documents:
             for sentence in document.sentences:
                 for token in sentence.tokens:
                     n_grams = self.create_n_grams(token.text)
-                    words.update(n_grams)
-        self.words = list(words)
+                    for n_gram in n_grams:
+                        vocabulary.update_word_count(n_gram)
+
+        vocabulary.truncate_vocabulary(min_word_frequency=10)
+        self.words = list(vocabulary.words.items())
 
     def create_n_grams(self, token: str) -> [str]:
         word = '#' + keep_only_printable_chars(token) + '#'
