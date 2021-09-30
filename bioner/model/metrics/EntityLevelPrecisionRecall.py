@@ -124,11 +124,7 @@ class Annotation:
 
 
 def _create_BIO2_labels_from_batch_indices(indices_batch: [[int]], ignore_index: int) -> [[BIO2Tag]]:
-    batch_labels = []
-    for indices in indices_batch:
-        labels = _create_BIO2_labels_from_indices(indices, ignore_index=ignore_index)
-        batch_labels.append(labels)
-    return batch_labels
+    return [_create_BIO2_labels_from_indices(indices, ignore_index=ignore_index) for indices in indices_batch]
 
 
 def _create_BIO2_labels_from_indices(indices: [int], ignore_index: int) -> [BIO2Tag]:
