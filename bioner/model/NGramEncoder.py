@@ -39,14 +39,15 @@ class NGramEncoder:
                     n_grams = self.create_n_grams(token.text)
                     for n_gram in n_grams:
                         vocabulary.update_word_count(n_gram)
-
         vocabulary.truncate_vocabulary(min_word_frequency=10)
+        total = len(list(vocabulary.words.items()))
         self.words = list(vocabulary.words.items())
+        print(f"trained {len(self.words)}-{self.n}-grams ({total} total)")
 
     def create_n_grams(self, token: str) -> [str]:
         word = '#' + keep_only_printable_chars(token) + '#'
         n_grams = []
-        for i in range(len(word) - self.n):
+        for i in range(len(word) - self.n + 1):
             n_grams.append(word[i:i + self.n])
         return n_grams
 
