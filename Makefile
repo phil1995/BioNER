@@ -19,12 +19,13 @@ mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 mkfile_dir := $(dir $(mkfile_path))
 
 main_path := $(mkfile_dir)main.py
+datexis_path := $(mkfile_dir)datexis.py
 
 additional_bilstm_layers := 1
 
 train-datexis-ner:
 	mkdir -p $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs && \
-	$(python_path) $(main_path) \
+	$(python_path) $(datexis_path) \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
 	--modelOutputFolder $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/ \
