@@ -209,6 +209,10 @@ def main():
                         type=str,
                         help='Path to the dataset annotated with SciBERT',
                         required=False)
+    parser.add_argument('--bioBERT',
+                        type=str,
+                        help='Path to the dataset annotated with BioBERT',
+                        required=False)
     parser.add_argument('--outputFile',
                         type=str,
                         help='Path to the error analysis output file',
@@ -242,6 +246,21 @@ def main():
         percentage_of_model(overlapping_result=overlapping_result,
                             analysis_1=automatic_bioner_error_analysis,
                             analysis_2=automatic_scibert_error_analysis)
+    if args.bioBERT is not None:
+        biobert_annotated_dataset = CoNLLDataset(data_file_path=args.bioBERT)
+        biobert_analysis = analysis.compare_to(other_dataset=biobert_annotated_dataset)
+        biobert_analysis.name = "BioBERT"
+        all_analyses.append(scibert_analysis)
+
+        automatic_biobert_error_analysis = ErrorAnalysis(gold_standard_dataset=gold_standard_dataset,
+                                                         dataset=biobert_annotated_dataset,
+                                                         name="BioBERT")
+        automatic_biobert_error_analysis.analyze_annotations()
+        overlapping_result = calc_overlapping_statistics(automatic_bioner_error_analysis,
+                                                         automatic_biobert_error_analysis)
+        percentage_of_model(overlapping_result=overlapping_result,
+                            analysis_1=automatic_bioner_error_analysis,
+                            analysis_2=automatic_biobert_error_analysis)
 
     if args.outputFile is not None:
         ManualErrorAnalysis.export_to_csv(error_analysis_objects=all_analyses,

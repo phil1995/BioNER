@@ -39,10 +39,9 @@ def annotate(dataset: CoNLLDataset, predictions_file_path: str) -> CoNLLDataset:
 
 
 def annotate_to_file(dataset_file_path: str, predictions_file_path: str, output_file_path: str):
-    dataset = CoNLLDataset(data_file_path=dataset_file_path, encoder=None)
+    dataset = CoNLLDataset(data_file_path=dataset_file_path)
     annotated_dataset = annotate(dataset=dataset, predictions_file_path=predictions_file_path)
-    write_dataset_to_conll_file(dataset=dataset, annotated_dataset=annotated_dataset,
-                                file_path=output_file_path)
+    CoNLLDataset.write_dataset_to_file(dataset=annotated_dataset, file_path=output_file_path)
 
 
 def write_dataset_to_conll_file(dataset: CoNLLDataset, annotated_dataset: CoNLLDataset, file_path: str):
