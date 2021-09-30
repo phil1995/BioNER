@@ -14,7 +14,7 @@ def test_read_documents_empty_lines_at_the_end(tmpdir):
     with open(file_path, "w") as text_file:
         text_file.write(content)
 
-    dataset = CoNLLDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path)
     assert len(dataset.documents) == 2
     expected_documents = create_expected_documents_for_test_document()
     assert expected_documents == dataset.documents
@@ -27,7 +27,7 @@ def test_read_documents(tmpdir):
     with open(file_path, "w") as text_file:
         text_file.write(content)
 
-    dataset = CoNLLDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path)
     assert len(dataset.documents) == 2
     expected_documents = create_expected_documents_for_test_document()
     assert expected_documents == dataset.documents
@@ -39,7 +39,7 @@ def test_flatten_documents(tmpdir):
 
     with open(file_path, "w") as text_file:
         text_file.write(content)
-    dataset = CoNLLDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path)
 
     assert dataset.sentences is None
     dataset.flatten_dataset()
@@ -53,7 +53,7 @@ def test_write_dataset_to_file(tmpdir):
     content = create_test_document_content_without_types()
     with open(file_path, "w") as text_file:
         text_file.write(content)
-    dataset = CoNLLDataset(file_path, encoder=None)
+    dataset = CoNLLDataset(file_path)
     output_file_path = tmpdir.join("output_test_CoNLL_file.txt")
     CoNLLDataset.write_dataset_to_file(dataset=dataset, file_path=output_file_path)
 

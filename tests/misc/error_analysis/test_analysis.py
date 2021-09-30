@@ -144,4 +144,4 @@ def create_gold_dataset(tmpdir) -> CoNLLDataset:
     content = create_test_document_content()
     with open(file_path, "w") as text_file:
         text_file.write(content)
-    return CoNLLDataset(file_path, encoder=None)
+    return CoNLLDataset(file_path)
