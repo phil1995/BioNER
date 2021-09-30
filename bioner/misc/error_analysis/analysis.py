@@ -3,19 +3,11 @@ import argparse
 import csv
 import random
 from collections import defaultdict
-from typing import Optional, TextIO
+from typing import Optional
 
-import fasttext
-import torch
-from fasttext.FastText import _FastText
-
-from bioner.misc.biobert import postprocess_predictions
-from bioner.misc.scibert.scibert_eval import SciBERTNER
-from bioner.model.Annotator import Annotator
 from bioner.model.BIO2Tag import BIO2Tag
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.metrics.EntityLevelPrecisionRecall import convert_labeled_tokens_to_annotations, count_true_positives
-from bioner.model.model_loader import DATEXISNERStackedBiLSTMLayerConfiguration, ModelLoader
 
 
 class ManualErrorAnalysis:
@@ -120,6 +112,7 @@ class ErrorAnalysis:
 
         predicted_annotations = convert_labeled_tokens_to_annotations(predicted_labels)
         gold_standard_annotations = convert_labeled_tokens_to_annotations(gold_standard_labels)
+
         self.false_positive_annotations = list(set(predicted_annotations) - set(gold_standard_annotations))
         self.false_negative_annotations = list(set(gold_standard_annotations) - set(predicted_annotations))
         self.true_positive_annotations = list(set(predicted_annotations).intersection(set(gold_standard_annotations)))
@@ -159,30 +152,6 @@ class ErrorStatistics:
         return result
 
 
-def annotate_dataset_with_scibert(dataset_file_path, contextual_ner_path: str):
-    evaluator = SciBERTNER(contextual_ner_path=contextual_ner_path)
-    dataset = CoNLLDataset(data_file_path=dataset_file_path, encoder=None)
-    return evaluator.annotate(dataset=dataset)
-
-
-def annotate_dataset_with_bioner(dataset_file_path, encoder: _FastText, model_path: str):
-    dataset = CoNLLDataset(data_file_path=dataset_file_path,
-                           encoder=encoder)
-    model_configuration = current_best_bioner_model_configuration()
-    model = ModelLoader.create_custom_stacked_datexis_ner_model(model_configuration)
-    model.load_state_dict(torch.load(model_path))
-    return Annotator.annotate_dataset(dataset=dataset,
-                                      model=model)
-
-
-def current_best_bioner_model_configuration():
-    return DATEXISNERStackedBiLSTMLayerConfiguration(input_vector_size=300,
-                                                     feedforward_layer_size=2048,
-                                                     lstm_layer_size=2048,
-                                                     amount_of_stacked_bilstm_layer=1,
-                                                     dropout_probability=0.0)
-
-
 def select_errors(gold_standard_dataset: CoNLLDataset, dataset: CoNLLDataset, n: int = 100, seed: int = 1632737901):
     analysis = ManualErrorAnalysis(gold_standard_dataset=gold_standard_dataset,
                                    dataset=dataset,
@@ -212,39 +181,43 @@ def deep_error_comparison(sentence_index: int, first_annotated_dataset: CoNLLDat
     gold_standard_annotations = convert_labeled_tokens_to_annotations([gold_standard_labels])
 
 
+def percentage_of_model(overlapping_result: OverlappingStatisticResult, analysis_1: ErrorAnalysis,
+                        analysis_2: ErrorAnalysis):
+    print(f"Overlapping Results for: {overlapping_result.name}\n"
+          f"TP: {overlapping_result.true_positives} "
+          f"({overlapping_result.true_positives / len(analysis_1.true_positive_annotations)} of {analysis_1.name} and "
+          f"{overlapping_result.true_positives / len(analysis_2.true_positive_annotations)} of {analysis_2.name})\n"
+          f"FP: {overlapping_result.false_positives} "
+          f"({overlapping_result.false_positives / len(analysis_1.false_positive_annotations)} of {analysis_1.name} and "
+          f"{overlapping_result.false_positives / len(analysis_2.false_positive_annotations)} of {analysis_2.name})\n"
+          f"FN: {overlapping_result.false_negatives} "
+          f"({overlapping_result.false_negatives / len(analysis_1.false_negative_annotations)} of {analysis_1.name} and "
+          f"{overlapping_result.false_negatives / len(analysis_2.false_negative_annotations)} of {analysis_2.name})")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Error Analysis')
-    parser.add_argument('--embeddings',
+    parser.add_argument('--gold_dataset',
                         type=str,
-                        help='Path to the embeddings file',
-                        required=True)
-    parser.add_argument('--dataset',
-                        type=str,
-                        help='Path to the dataset file',
-                        required=True)
-    parser.add_argument('--outputFile',
-                        type=str,
-                        help='Path to the error analysis output file',
+                        help='Path to the gold standard dataset file',
                         required=True)
     parser.add_argument('--bioNER',
                         type=str,
-                        help='Path to the BioNER model file',
+                        help='Path to the dataset annotated with BioNER',
                         required=True)
     parser.add_argument('--sciBERT',
                         type=str,
-                        help='Path to the SciBERT model file',
+                        help='Path to the dataset annotated with SciBERT',
+                        required=False)
+    parser.add_argument('--outputFile',
+                        type=str,
+                        help='Path to the error analysis output file',
                         required=False)
     args = parser.parse_args()
-    encoder = fasttext.load_model(
-        path=args.embeddings)
-    dataset_path = args.dataset
-    bioner_annotated_dataset = annotate_dataset_with_bioner(
-        dataset_file_path=dataset_path,
-        model_path=args.bioNER,
-        encoder=encoder)
-    gold_standard_dataset = CoNLLDataset(
-        data_file_path=dataset_path,
-        encoder=None)
+    gold_standard_dataset = CoNLLDataset(data_file_path=args.gold_dataset)
+
+    bioner_annotated_dataset = CoNLLDataset(data_file_path=args.bioNER)
+
     analysis = select_errors(gold_standard_dataset=gold_standard_dataset,
                              dataset=bioner_annotated_dataset)
 
@@ -255,8 +228,7 @@ def main():
 
     all_analyses = [analysis]
     if args.sciBERT is not None:
-        scibert_annotated_dataset = annotate_dataset_with_scibert(dataset_file_path=dataset_path,
-                                                                  contextual_ner_path=args.sciBERT)
+        scibert_annotated_dataset = CoNLLDataset(data_file_path=args.sciBERT)
         scibert_analysis = analysis.compare_to(other_dataset=scibert_annotated_dataset)
         scibert_analysis.name = "SciBERT"
         all_analyses.append(scibert_analysis)
@@ -265,14 +237,15 @@ def main():
                                                          dataset=scibert_annotated_dataset,
                                                          name="SciBERT")
         automatic_scibert_error_analysis.analyze_annotations()
-        overlapping_result = calc_overlapping_statistics(automatic_bioner_error_analysis, automatic_scibert_error_analysis)
-        print(f"Overlapping Results for: {overlapping_result.name}\n"
-              f"TP: {overlapping_result.true_positives} ({overlapping_result.true_positives / len(automatic_bioner_error_analysis.true_positive_annotations)}%)\n"
-              f"FP: {overlapping_result.false_positives} ({overlapping_result.false_positives / len(automatic_bioner_error_analysis.false_positive_annotations)}%)\n"
-              f"FN: {overlapping_result.false_negatives} ({overlapping_result.false_negatives / len(automatic_bioner_error_analysis.false_negative_annotations)}%)")
+        overlapping_result = calc_overlapping_statistics(automatic_bioner_error_analysis,
+                                                         automatic_scibert_error_analysis)
+        percentage_of_model(overlapping_result=overlapping_result,
+                            analysis_1=automatic_bioner_error_analysis,
+                            analysis_2=automatic_scibert_error_analysis)
 
-    ManualErrorAnalysis.export_to_csv(error_analysis_objects=all_analyses,
-                                      output_file_path=args.outputFile)
+    if args.outputFile is not None:
+        ManualErrorAnalysis.export_to_csv(error_analysis_objects=all_analyses,
+                                          output_file_path=args.outputFile)
 
 
 if __name__ == '__main__':

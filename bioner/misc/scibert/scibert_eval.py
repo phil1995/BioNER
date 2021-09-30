@@ -4,7 +4,7 @@ from copy import deepcopy
 import numpy as np
 from allennlp.data.tokenizers import WhitespaceTokenizer
 from allennlp.predictors.predictor import Predictor
-#from allennlp.data.tokenizers.word_splitter import JustSpacesWordSplitter
+from allennlp.data.tokenizers.word_splitter import JustSpacesWordSplitter
 
 from bioner.model.BIO2Tag import BIO2Tag
 from bioner.model.CoNLLDataset import CoNLLDataset

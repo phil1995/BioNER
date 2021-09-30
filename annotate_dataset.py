@@ -8,13 +8,15 @@ from bioner.model.Annotator import Annotator
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.model_loader import DATEXISNERStackedBiLSTMLayerConfiguration, ModelLoader
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def annotate_dataset_with_bioner(dataset_file_path, encoder: _FastText, model_path: str):
     dataset = CoNLLDataset(data_file_path=dataset_file_path,
                            encoder=encoder)
     model_configuration = current_best_bioner_model_configuration()
     model = ModelLoader.create_custom_stacked_datexis_ner_model(model_configuration)
-    model.load_state_dict(torch.load(model_path))
+    model.load_state_dict(torch.load(model_path, map_location=device))
     return Annotator.annotate_dataset(dataset=dataset,
                                       model=model)
 
