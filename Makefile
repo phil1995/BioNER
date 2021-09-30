@@ -23,7 +23,7 @@ main_path := $(mkfile_dir)main.py
 additional_bilstm_layers := 1
 
 train-datexis-ner:
-    mkdir -p $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
+	mkdir -p $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs && \
 	$(python_path) $(main_path) \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
