@@ -101,7 +101,7 @@ class Annotator:
         precision = EntityLevelPrecision()
         recall = EntityLevelRecall()
 
-        def deterministic_cross_entropy_loss(y_pred, y,):
+        def deterministic_cross_entropy_loss(y_pred, y):
             """
             CrossEntropyLoss does not have a deterministic implementation for CUDA.
             For more details:  https://github.com/pytorch/pytorch/issues/46024
@@ -116,7 +116,8 @@ class Annotator:
             return loss
 
         metrics = {"Precision": precision, "Recall": recall,
-                   "F1": (precision * recall * 2 / (precision + recall + 1e-20)).mean(), "loss": Loss(deterministic_cross_entropy_loss)}
+                   "F1": (precision * recall * 2 / (precision + recall + 1e-20)).mean(),
+                   "loss": Loss(deterministic_cross_entropy_loss)}
 
         train_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
         validation_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
@@ -194,11 +195,12 @@ class Annotator:
         precision = EntityLevelPrecision()
         recall = EntityLevelRecall()
         f1 = (precision * recall * 2 / (precision + recall + 1e-20)).mean()
-        confusion_matrix = ConfusionMatrix(num_classes=3)
-        evaluator = create_supervised_evaluator(model, metrics={"Precision": precision,
-                                                                "Recall": recall,
-                                                                "F1": f1,
-                                                                "confusion_matrix": confusion_matrix})
+        evaluator = create_supervised_evaluator(model,
+                                                metrics={"Precision": precision,
+                                                         "Recall": recall,
+                                                         "F1": f1
+                                                         },
+                                                device=device)
 
         return evaluator
 
