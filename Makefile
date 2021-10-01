@@ -23,7 +23,6 @@ datexis_path := $(mkfile_dir)datexis.py
 
 additional_bilstm_layers := 1
 
-fast_training_mode_enabled := False
 train-datexis-ner:
 	mkdir -p $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs && \
 	$(python_path) $(datexis_path) \
@@ -90,8 +89,7 @@ train-original:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--model DATEXIS-NER \
-	--enableFasterTraining $(fast_training_mode_enabled)
+	--model DATEXIS-NER
 
 train-all-original-adam:
 	$(MAKE) train-original-adam ngrams=3-3 && \
@@ -119,8 +117,7 @@ train-original-adam:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--model DATEXIS-NER \
-	--enableFasterTraining $(fast_training_mode_enabled)
+	--model DATEXIS-NER
 
 train-all-custom-DATEXIS:
 	$(MAKE) train-custom-DATEXIS ngrams=3-3 ff=$(ff) lstm=$(lstm) && \
@@ -150,9 +147,7 @@ train-custom-DATEXIS:
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/tensorboard_logs \
 	--model CustomConfig_DATEXIS-NER \
 	--ff1 $(ff) \
-	--lstm1 $(lstm) \
-	--enableFasterTraining $(fast_training_mode_enabled)
-
+	--lstm1 $(lstm)
 train-all-custom-stacked-DATEXIS:
 	$(MAKE) train-custom-stacked-DATEXIS ngrams=3-3 ff=$(ff) lstm=$(lstm) && \
 	$(MAKE) train-custom-stacked-DATEXIS ngrams=3-4 ff=$(ff) lstm=$(lstm) && \
@@ -183,5 +178,4 @@ train-custom-stacked-DATEXIS:
 	--ff1 $(ff) \
 	--lstm1 $(lstm) \
 	--additionalBiLSTMLayers $(additional_bilstm_layers) \
-	--dropoutProbability $(dropout) \
-	--enableFasterTraining $(fast_training_mode_enabled)
+	--dropoutProbability $(dropout)

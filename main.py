@@ -80,10 +80,8 @@ if __name__ == '__main__':
                                 help='The dropout probability, should be between 0.0 and 1.0',
                                 required=False)
     required_named.add_argument('--enableFasterTraining',
-                                type=bool,
-                                default=False,
-                                help='Enable faster training by compute metrics only every 10th epoch',
-                                required=False)
+                                action='store_true',
+                                help='Enable faster training by compute metrics only every 10th epoch')
     args = parser.parse_args()
 
     # Reproducibility
