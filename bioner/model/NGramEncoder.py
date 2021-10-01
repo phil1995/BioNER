@@ -40,8 +40,8 @@ class NGramEncoder:
                     n_grams = self.create_n_grams(token.text)
                     for n_gram in n_grams:
                         vocabulary.update_word_count(n_gram)
-        vocabulary.truncate_vocabulary(min_word_frequency=10)
         total = len(list(vocabulary.words.items()))
+        vocabulary.truncate_vocabulary(min_word_frequency=10)
         self.words = list(vocabulary.words.items())
         print(f"trained {len(self.words)}-{self.n}-grams ({total} total)")
 

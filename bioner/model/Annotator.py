@@ -123,7 +123,13 @@ class Annotator:
         train_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
         validation_evaluator = Annotator.create_evaluator(model=model, metrics=metrics)
 
-        @trainer.on(Events.EPOCH_COMPLETED(every=10 if parameters.faster_training_evaluation else 1))
+        training_evaluation_interval = 1
+        if parameters.faster_training_evaluation:
+            training_evaluation_interval = 10
+            logging.warning(f"Faster Training Evaluation enabled - compute metrics "
+                            f"only every {training_evaluation_interval} epochs")
+
+        @trainer.on(Events.EPOCH_COMPLETED(every=training_evaluation_interval))
         def compute_training_metrics(engine):
             # Evaluate after each training (or every 10th if faster_training_evaluation is enabled) epoch
             # on training dataset
