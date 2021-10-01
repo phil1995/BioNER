@@ -34,7 +34,8 @@ train-datexis-ner:
 	--numWorkers $(num_workers) \
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
-	--tensorboardLogDirectory $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs
+	--tensorboardLogDirectory $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	$(args)
 
 train-all: 
 	$(MAKE) train ngrams=3-3 && \
@@ -89,7 +90,8 @@ train-original:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--model DATEXIS-NER
+	--model DATEXIS-NER \
+	$(args)
 
 train-all-original-adam:
 	$(MAKE) train-original-adam ngrams=3-3 && \
@@ -117,7 +119,8 @@ train-original-adam:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--model DATEXIS-NER
+	--model DATEXIS-NER \
+	$(args)
 
 train-all-custom-DATEXIS:
 	$(MAKE) train-custom-DATEXIS ngrams=3-3 ff=$(ff) lstm=$(lstm) && \
@@ -147,7 +150,9 @@ train-custom-DATEXIS:
 	--tensorboardLogDirectory $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/tensorboard_logs \
 	--model CustomConfig_DATEXIS-NER \
 	--ff1 $(ff) \
-	--lstm1 $(lstm)
+	--lstm1 $(lstm) \
+	$(args)
+
 train-all-custom-stacked-DATEXIS:
 	$(MAKE) train-custom-stacked-DATEXIS ngrams=3-3 ff=$(ff) lstm=$(lstm) && \
 	$(MAKE) train-custom-stacked-DATEXIS ngrams=3-4 ff=$(ff) lstm=$(lstm) && \
@@ -178,4 +183,5 @@ train-custom-stacked-DATEXIS:
 	--ff1 $(ff) \
 	--lstm1 $(lstm) \
 	--additionalBiLSTMLayers $(additional_bilstm_layers) \
-	--dropoutProbability $(dropout)
+	--dropoutProbability $(dropout) \
+	$(args)
