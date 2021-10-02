@@ -20,6 +20,7 @@ mkfile_dir := $(dir $(mkfile_path))
 
 main_path := $(mkfile_dir)main.py
 datexis_path := $(mkfile_dir)datexis.py
+parameter_optim_path := $(mkfile_dir)parameter_optimization.py
 
 additional_bilstm_layers := 1
 
@@ -184,4 +185,13 @@ train-custom-stacked-DATEXIS:
 	--lstm1 $(lstm) \
 	--additionalBiLSTMLayers $(additional_bilstm_layers) \
 	--dropoutProbability $(dropout) \
+	$(args)
+
+parameter-optimization:
+	$(python_path) $(parameter_optim_path) \
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
+	--training $(training_dataset) \
+	--validation $(validation_dataset) \
+	--modelOutputFolder $(model_output_directory)stacked_DATEXIS_NER_ADAM/$(ngrams)ngrams/ \
+	--additionalBiLSTMLayers $(additional_bilstm_layers) \
 	$(args)

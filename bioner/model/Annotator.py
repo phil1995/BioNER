@@ -191,6 +191,7 @@ class Annotator:
             Annotator.test(encoder=encoder, test_dataset_path=parameters.test_dataset_path,
                            best_model_state_path=join(parameters.model_save_path, checkpoint_handler.last_checkpoint),
                            num_workers=parameters.num_workers)
+        return validation_evaluator.state
 
     @staticmethod
     def test(encoder: Encoder, test_dataset_path: str, best_model_state_path: str, num_workers: int = 0):
