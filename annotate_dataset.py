@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 
@@ -6,6 +7,7 @@ from bioner.model.Annotator import Annotator
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.FasttextEncoder import FasttextEncoder
 from bioner.model.model_loader import DATEXISNERStackedBiLSTMLayerConfiguration, ModelLoader
+from dataset_to_conll_file import write_dataset_to_conll_file
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -45,6 +47,10 @@ def main():
                         type=str,
                         help='Path to the BioNER model file',
                         required=True)
+    parser.add_argument('--enableExportCoNLL',
+                        action='store_true',
+                        help='Enable to store the predictions side by side'
+                             ' with the gold standard labels for the original conll eval script')
     args = parser.parse_args()
     encoder = FasttextEncoder(embeddings_file_path=args.embeddings)
     bioner_annotated_dataset = annotate_dataset_with_bioner(
@@ -52,6 +58,14 @@ def main():
         model_path=args.model,
         encoder=encoder)
     CoNLLDataset.write_dataset_to_file(dataset=bioner_annotated_dataset, file_path=args.outputFile)
+
+    if args.enableExportCoNLL:
+        conll_output_path, _ = os.path.splitext(args.outputFile)
+        conll_output_path = conll_output_path + ".conll"
+        gold_standard_dataset = CoNLLDataset(data_file_path=args.dataset)
+        write_dataset_to_conll_file(dataset=gold_standard_dataset,
+                                    annotated_dataset=bioner_annotated_dataset,
+                                    file_path=conll_output_path)
 
 
 if __name__ == '__main__':
