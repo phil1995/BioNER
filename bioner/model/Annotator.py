@@ -327,8 +327,10 @@ class Annotator:
                 x, y, original_lengths = batch
                 y_pred = model(x, original_lengths)
                 predicted_batch_indices = torch.argmax(y_pred, dim=1)
+                predicted_batch_indices = [predicted_indices[:original_lengths[index]] for index, predicted_indices in enumerate(predicted_batch_indices)]
                 predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices,
                                                                           ignore_index=ignore_label_index)
+
                 for predicted_sentence_labels in predicted_labels:
                     all_predicted_labels.append(predicted_sentence_labels)
         annotated_dataset = deepcopy(dataset)
