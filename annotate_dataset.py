@@ -1,19 +1,17 @@
 import argparse
 
-import fasttext
 import torch
-from fasttext.FastText import _FastText
 
 from bioner.model.Annotator import Annotator
 from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.FasttextEncoder import FasttextEncoder
 from bioner.model.model_loader import DATEXISNERStackedBiLSTMLayerConfiguration, ModelLoader
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def annotate_dataset_with_bioner(dataset_file_path, encoder: _FastText, model_path: str):
-    dataset = CoNLLDataset(data_file_path=dataset_file_path,
-                           encoder=encoder)
+def annotate_dataset_with_bioner(dataset_file_path, encoder: FasttextEncoder, model_path: str):
+    dataset = Annotator.load_dataset(path=dataset_file_path, encoder=encoder)
     model_configuration = current_best_bioner_model_configuration()
     model = ModelLoader.create_custom_stacked_datexis_ner_model(model_configuration)
     model.load_state_dict(torch.load(model_path, map_location=device))
@@ -48,8 +46,7 @@ def main():
                         help='Path to the BioNER model file',
                         required=True)
     args = parser.parse_args()
-    encoder = fasttext.load_model(
-        path=args.embeddings)
+    encoder = FasttextEncoder(embeddings_file_path=args.embeddings)
     bioner_annotated_dataset = annotate_dataset_with_bioner(
         dataset_file_path=args.dataset,
         model_path=args.model,

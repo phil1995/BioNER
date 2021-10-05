@@ -322,7 +322,7 @@ class Annotator:
         model.eval()
         with torch.no_grad():
             data_loader = MedMentionsDataLoader(dataset=dataset, shuffle=False, num_workers=0,
-                                                batch_size=1, collate_fn=collate_batch)
+                                                batch_size=128, collate_fn=collate_batch)
             for batch in data_loader:
                 x, y, original_lengths = batch
                 y_pred = model(x, original_lengths)
