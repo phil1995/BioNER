@@ -1,7 +1,7 @@
 import math
 
 from torch import Tensor
-from torch.nn import Linear, LSTM, Module, init, ModuleList, Dropout
+from torch.nn import Linear, LSTM, Module, init, ModuleList, Dropout, BatchNorm1d
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
@@ -66,7 +66,8 @@ class StackedBiLSTMModel(Module):
                  feedforward_layer_size: int = 150,
                  lstm_layer_size: int = 20,
                  out_features: int = 3,
-                 dropout_probability: float = 0):
+                 dropout_probability: float = 0,
+                 batch_normalization_enabled: bool = False):
         super().__init__()
 
         print(
@@ -74,10 +75,13 @@ class StackedBiLSTMModel(Module):
             f"Feedforward Layer Size:{feedforward_layer_size} "
             f"LSTM Layer Size:{lstm_layer_size} "
             f"Out Feature Size:{out_features} "
-            f"# Stacked BiLSTMs:{additional_bilstm_layer}"
-            f"# Dropout prob.:{dropout_probability}")
+            f"# Stacked BiLSTMs:{additional_bilstm_layer} "
+            f"Dropout prob.:{dropout_probability}")
+        if batch_normalization_enabled:
+            print("Batch normalization enabled")
         assert additional_bilstm_layer >= 0
         assert dropout_probability >= 0 <= 1.0
+        self.batch_normalization_enabled = batch_normalization_enabled
         self.dropout = Dropout(p=dropout_probability)
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
         self.biLSTM = LSTM(input_size=feedforward_layer_size,
@@ -89,6 +93,10 @@ class StackedBiLSTMModel(Module):
                                                     for i in range(additional_bilstm_layer)])
         self.encoderLSTM = LSTM(input_size=lstm_layer_size * 2, hidden_size=lstm_layer_size, batch_first=True)
         self.hidden2tag = Linear(in_features=lstm_layer_size, out_features=out_features)
+        if batch_normalization_enabled:
+            self.ffBatchNorm = BatchNorm1d(feedforward_layer_size)
+            self.encoderLSTMBatchNorm = BatchNorm1d(lstm_layer_size)
+            self.biLSTMBatchNorms = ModuleList([BatchNorm1d(lstm_layer_size * 2) for i in range(additional_bilstm_layer + 1)])
         self.init_weights()
 
     def init_weights(self):
@@ -113,17 +121,34 @@ class StackedBiLSTMModel(Module):
 
     def forward(self, x, lengths):
         x = self.ff1(x)
-        x = self.dropout(x)
+        if self.batch_normalization_enabled:
+            x = x.permute(0, 2, 1)
+            x = self.ffBatchNorm(x)
+            x = x.permute(0, 2, 1)
         x = F.relu(x)
+        x = self.dropout(x)
         x = pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
         bi_lstm_out, (h, c) = self.biLSTM(x)
+        if self.batch_normalization_enabled:
+            bi_lstm_out = StackedBiLSTMModel.apply_batch_norm_pack_padded_sequence(sequence=bi_lstm_out,
+                                                                                   batch_norm=self.biLSTMBatchNorms[0],
+                                                                                   lengths=lengths.cpu())
         bi_lstm_out = self.dropout_pack_padded_sequence(sequence=bi_lstm_out,
                                                         lengths=lengths)
-        for additional_biLSTM_layer in self.additional_biLSTM_layers:
+        for i, additional_biLSTM_layer in enumerate(self.additional_biLSTM_layers):
             bi_lstm_out, (h, c) = additional_biLSTM_layer(bi_lstm_out)
+            if self.batch_normalization_enabled:
+                bi_lstm_out = StackedBiLSTMModel.apply_batch_norm_pack_padded_sequence(sequence=bi_lstm_out,
+                                                                                       batch_norm=self.biLSTMBatchNorms[
+                                                                                           i+1],
+                                                                                       lengths=lengths.cpu())
             bi_lstm_out = self.dropout_pack_padded_sequence(sequence=bi_lstm_out,
                                                             lengths=lengths)
         lstm_out, (h, c) = self.encoderLSTM(bi_lstm_out)
+        if self.batch_normalization_enabled:
+            lstm_out = StackedBiLSTMModel.apply_batch_norm_pack_padded_sequence(sequence=lstm_out,
+                                                                                batch_norm=self.encoderLSTMBatchNorm,
+                                                                                lengths=lengths.cpu())
         lstm_out, _ = pad_packed_sequence(lstm_out, batch_first=True)
         tag_space = self.hidden2tag(lstm_out)
         # Permute the tag space as CrossEntropyLoss expects an output shape of: [batch_size, nb_classes, seq_length]
@@ -142,4 +167,12 @@ class StackedBiLSTMModel(Module):
         """
         x, _ = pad_packed_sequence(sequence, batch_first=True)
         x = self.dropout(x)
+        return pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
+
+    @staticmethod
+    def apply_batch_norm_pack_padded_sequence(sequence, batch_norm, lengths):
+        x, _ = pad_packed_sequence(sequence, batch_first=True)
+        x = x.permute(0, 2, 1)
+        x = batch_norm(x)
+        x = x.permute(0, 2, 1)
         return pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
