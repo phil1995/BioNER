@@ -27,13 +27,15 @@ class DATEXISNERStackedBiLSTMLayerConfiguration(DATEXISNERLayerConfiguration):
                  lstm_layer_size: int = 20,
                  out_features: int = 3,
                  amount_of_stacked_bilstm_layer: int = 1,
-                 dropout_probability: float = 0):
+                 dropout_probability: float = 0,
+                 batch_normalization_enabled: bool = False):
         super().__init__(input_vector_size=input_vector_size,
                          feedforward_layer_size=feedforward_layer_size,
                          lstm_layer_size=lstm_layer_size,
                          out_features=out_features)
         self.amount_of_stacked_bilstm_layer = amount_of_stacked_bilstm_layer
         self.dropout_probability = dropout_probability
+        self.batch_normalization_enabled = batch_normalization_enabled
 
 
 class LayerConfigurationCreator:
@@ -44,7 +46,8 @@ class LayerConfigurationCreator:
                                                              feedforward_layer_size=args.ff1,
                                                              lstm_layer_size=args.lstm1,
                                                              amount_of_stacked_bilstm_layer=args.additionalBiLSTMLayers,
-                                                             dropout_probability=args.dropoutProbability)
+                                                             dropout_probability=args.dropoutProbability,
+                                                             batch_normalization_enabled=args.enableBatchNormalization)
         if args.ff1 is not None and args.lstm1 is not None:
             return DATEXISNERLayerConfiguration(input_vector_size=input_vector_size,
                                                 feedforward_layer_size=args.ff1,
@@ -107,4 +110,5 @@ class ModelLoader:
                                   lstm_layer_size=layer_configuration.lstm_layer_size,
                                   out_features=layer_configuration.out_features,
                                   additional_bilstm_layer=layer_configuration.amount_of_stacked_bilstm_layer,
-                                  dropout_probability=layer_configuration.dropout_probability)
+                                  dropout_probability=layer_configuration.dropout_probability,
+                                  batch_normalization_enabled=layer_configuration.batch_normalization_enabled)

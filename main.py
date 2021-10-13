@@ -82,6 +82,9 @@ if __name__ == '__main__':
     required_named.add_argument('--enableFasterTraining',
                                 action='store_true',
                                 help='Enable faster training by compute metrics only every 10th epoch')
+    required_named.add_argument('--enableBatchNormalization',
+                                action='store_true',
+                                help='Enable batch normalization')
     args = parser.parse_args()
 
     # Reproducibility
