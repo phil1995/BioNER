@@ -21,7 +21,7 @@ class PositionEncoder:
                                                                       begin_sentence=begin_sentence,
                                                                       end_sentence=end_sentence,
                                                                       end_document=end_doc and end_sentence)
-                    token.encoding = np.concatenate((token.encoding, position_encoding))
+                    token.encoding = np.concatenate((position_encoding, token.encoding))
                     begin_sentence = False
                 begin_doc = False
 

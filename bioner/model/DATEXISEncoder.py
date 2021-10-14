@@ -28,7 +28,7 @@ class DATEXISEncoder(Encoder):
         trigram_encoding = self.trigram_encoder.encode(token.text)
         surface_encoding = self.surface_encoder.encode(token.text)
 
-        return EncodedToken(encoding=np.concatenate((trigram_encoding, surface_encoding)), text=token.text,
+        return EncodedToken(encoding=np.concatenate((surface_encoding, trigram_encoding)), text=token.text,
                             start=token.start, end=token.end, tag=token.tag)
 
     def learn_trigram_encoding(self, dataset: CoNLLDataset):

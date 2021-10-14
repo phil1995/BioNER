@@ -1,8 +1,8 @@
+from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.NGramEncoder import NGramEncoder, keep_only_printable_chars, TrigramEncoder
 
 
 def test_alphabet():
-
     text = "Test"
     assert text.lower() == keep_only_printable_chars(text)
 
@@ -70,3 +70,54 @@ def test_n_gram_generation():
     text = "cat"
     five_grams = five_gram.create_n_grams(text)
     assert five_grams == ["#cat#"]
+
+
+def test_n_gram_encoder(tmpdir):
+    file_path = tmpdir.join("test_CoNLL_file.txt")
+    content = create_test_data()
+    with open(file_path, "w") as text_file:
+        text_file.write(content)
+    dataset = CoNLLDataset(file_path)
+    trigram_encoder = TrigramEncoder()
+    trigram_encoder.create_encodings(dataset=dataset, min_word_frequency=1)
+
+    assert trigram_encoder.get_embeddings_vector_size() == 23
+    assert not trigram_encoder.is_unknown(word="Prime")
+    assert trigram_encoder.is_unknown("Kengo")
+    vector1 = trigram_encoder.encode("Minister")
+    vector2 = trigram_encoder.encode("Mistister")
+
+    assert len(vector1) == 23
+    assert len(vector2) == 23
+
+    assert max(vector1) == 1
+    assert max(vector2) == 1
+
+    assert sum(vector1) == 8
+    assert sum(vector2) == 5
+
+
+def test_encodings(tmpdir):
+    file_path = tmpdir.join("test_CoNLL_file.txt")
+    content = create_test_data()
+    with open(file_path, "w") as text_file:
+        text_file.write(content)
+    dataset = CoNLLDataset(file_path)
+    trigram_encoder = TrigramEncoder()
+    trigram_encoder.create_encodings(dataset=dataset, min_word_frequency=1)
+
+    size = trigram_encoder.get_embeddings_vector_size()
+
+    vector = trigram_encoder.encode("Minister")
+
+    assert len(vector) == size
+
+
+def create_test_data():
+    # Taken from https://github.com/sebastianarnold/TeXoo/blob/514860d96decdf3ff6613dfcf0d27d9845ddcf60/texoo-core/src/test/java/de/datexis/encoder/NGramEncoderTest.java#L188-L191
+    return """-DOCSTART-	0	0	O
+Zaimean	0	5	B
+Prime	6	10	I
+Minister	11	16	I
+Kisto	0	5	B
+"""

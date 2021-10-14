@@ -26,23 +26,43 @@ class Vocabulary:
                 truncated_words[key] = value
         self.words = truncated_words
 
+    def update_huffman_codes(self):
+        # get vocabulary as sorted list
+        vocab_words = self.convert_words_to_vocab_words()
+        vocab_words.sort(key=lambda vocab_word: vocab_word.count)
+        print(vocab_words[0].count)
+
+    def convert_words_to_vocab_words(self):
+        vocab_words = []
+        for word, count in self.words:
+            vocab_words.append(VocabularyWord(word=word, count=count))
+        return vocab_words
+
+class VocabularyWord:
+    def __init__(self, word, count):
+        self.word = word
+        self.count = count
+
+    def __lt__(self, other):
+        return self.count < other.count
 
 class NGramEncoder:
     def __init__(self, n: int):
         self.n = n
         self.words = []
+        self.vocabulary = None
 
-    def create_encodings(self, dataset: CoNLLDataset):
-        vocabulary = Vocabulary()
+    def create_encodings(self, dataset: CoNLLDataset, min_word_frequency: int = 10):
+        self.vocabulary = Vocabulary()
         for document in dataset.documents:
             for sentence in document.sentences:
                 for token in sentence.tokens:
                     n_grams = self.create_n_grams(token.text)
                     for n_gram in n_grams:
-                        vocabulary.update_word_count(n_gram)
-        total = len(list(vocabulary.words.items()))
-        vocabulary.truncate_vocabulary(min_word_frequency=10)
-        self.words = list(vocabulary.words.items())
+                        self.vocabulary.update_word_count(n_gram)
+        total = len(list(self.vocabulary.words.keys()))
+        self.vocabulary.truncate_vocabulary(min_word_frequency=min_word_frequency)
+        self.words = list(self.vocabulary.words.keys())
         print(f"trained {len(self.words)}-{self.n}-grams ({total} total)")
 
     def create_n_grams(self, token: str) -> [str]:
@@ -70,6 +90,13 @@ class NGramEncoder:
                 continue
             vector[index] = 1.0
         return vector
+
+    def is_unknown(self, word) -> bool:
+        ngrams = self.create_n_grams(word)
+        for ngram in ngrams:
+            if self.vocabulary.words[ngram] == 0:
+                return True
+        return False
 
 
 class TrigramEncoder(NGramEncoder):
