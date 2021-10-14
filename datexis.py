@@ -54,6 +54,9 @@ def main():
                                 type=str,
                                 help='The file path where to log the PyTorch Ignite training and validation',
                                 required=False)
+    required_named.add_argument('--enableFasterTraining',
+                                action='store_true',
+                                help='Enable faster training by compute metrics only every 10th epoch')
     args = parser.parse_args()
 
     # Reproducibility
@@ -78,7 +81,8 @@ def main():
                                     tensorboard_log_directory_path=args.tensorboardLogDirectory,
                                     training_log_file_path=args.trainingsLogFile,
                                     optimizer=optim.Adam(model.parameters(), lr=args.learningRate),
-                                    model=model)
+                                    model=model,
+                                    faster_training_evaluation=args.enableFasterTraining)
     Annotator.train(parameters)
 
 
