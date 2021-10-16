@@ -1,5 +1,5 @@
 from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.NGramEncoder import NGramEncoder, keep_only_printable_chars, TrigramEncoder
+from bioner.model.NGramEncoder import NGramEncoder, keep_only_printable_chars, TrigramEncoder, Vocabulary, LookupCache
 
 
 def test_alphabet():
@@ -111,6 +111,25 @@ def test_encodings(tmpdir):
     vector = trigram_encoder.encode("Minister")
 
     assert len(vector) == size
+
+
+def test_vocabulary_index(tmpdir):
+    vocabulary = Vocabulary()
+    vocabulary.increment_word_count("test")
+    vocabulary.increment_word_count("tests")
+    vocabulary.increment_word_count("testz")
+
+    vocabulary.increment_word_count("tests")
+    vocabulary.increment_word_count("tests")
+    vocabulary.increment_word_count("testz")
+
+    lookup_cache = LookupCache(vocabulary=vocabulary)
+
+    assert len(lookup_cache) == 3
+
+    assert lookup_cache.get_index_of_word("tests") == 0
+    assert lookup_cache.get_index_of_word("testz") == 1
+    assert lookup_cache.get_index_of_word("test") == 2
 
 
 def create_test_data():
