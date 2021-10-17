@@ -234,7 +234,7 @@ class BioNER(Module):
                                                         lengths=lengths)
         for i, additional_biLSTM_layer in enumerate(self.additional_biLSTM_layers):
             if self.skip_connection_enabled and i == 1:
-                bi_lstm_out = bi_lstm_out + identity
+                bi_lstm_out += identity
             bi_lstm_out, (h, c) = additional_biLSTM_layer(bi_lstm_out)
             bi_lstm_out = self.dropout_pack_padded_sequence(sequence=bi_lstm_out,
                                                             lengths=lengths)
