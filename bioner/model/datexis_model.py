@@ -192,7 +192,7 @@ class BioNER(Module):
             print("Skip Connection enabled")
         self.dropout = Dropout(p=dropout_probability)
         self.ff1 = Linear(in_features=input_vector_size, out_features=feedforward_layer_size)
-        self.biLSTM1 = LSTM(input_size=feedforward_layer_size,
+        self.biLSTM = LSTM(input_size=feedforward_layer_size,
                             bidirectional=True, hidden_size=lstm_layer_size, batch_first=True)
         self.additional_biLSTM_layers = ModuleList([LSTM(input_size=lstm_layer_size * 2,
                                                          bidirectional=True,
