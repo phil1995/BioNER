@@ -21,8 +21,42 @@ mkfile_dir := $(dir $(mkfile_path))
 main_path := $(mkfile_dir)main.py
 datexis_path := $(mkfile_dir)datexis.py
 parameter_optim_path := $(mkfile_dir)parameter_optimization.py
+bioner_path := $(mkfile_dir)bioner.py
 
 additional_bilstm_layers := 1
+
+train-bioner:
+	# Pass the ngrams parameter, e.g. make train-bioner ngrams=3-4
+	mkdir -p $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
+	$(python_path) $(main_path) \
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
+	--training $(training_dataset) \
+	--validation $(validation_dataset) \
+	--modelOutputFolder $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/ \
+	--batchSize $(batch_size) \
+	--maxEpochs $(max_epochs) \
+	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
+	--trainingsLogFile $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	$(args)
+
+train-bioner-skip-con:
+	# Pass the ngrams parameter, e.g. make train-bioner-skip-con ngrams=3-4
+	mkdir -p $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
+	$(python_path) $(main_path) \
+	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
+	--training $(training_dataset) \
+	--validation $(validation_dataset) \
+	--modelOutputFolder $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/ \
+	--batchSize $(batch_size) \
+	--maxEpochs $(max_epochs) \
+	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
+	--trainingsLogFile $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	--enableSkipConnection \
+	$(args)
 
 train-datexis-ner:
 	mkdir -p $(model_output_directory)DATEIXS-NER/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs && \
