@@ -28,7 +28,7 @@ additional_bilstm_layers := 1
 train-bioner:
 	# Pass the ngrams parameter, e.g. make train-bioner ngrams=3-4
 	mkdir -p $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
-	$(python_path) $(main_path) \
+	$(python_path) $(bioner_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
@@ -44,7 +44,7 @@ train-bioner:
 train-bioner-skip-con:
 	# Pass the ngrams parameter, e.g. make train-bioner-skip-con ngrams=3-4
 	mkdir -p $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
-	$(python_path) $(main_path) \
+	$(python_path) $(bioner_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
 	--training $(training_dataset) \
 	--validation $(validation_dataset) \
