@@ -184,7 +184,7 @@ class BioNER(Module):
                  feedforward_layer_size: int = 2048,
                  lstm_layer_size: int = 1024,
                  out_features: int = 3,
-                 dropout_probability: float = 0.9,
+                 dropout_probability: float = 0.8,
                  skip_connection_enabled: bool = False):
         super().__init__()
         self.skip_connection_enabled = skip_connection_enabled
