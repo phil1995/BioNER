@@ -5,8 +5,9 @@ import torch
 from torch import optim
 
 from bioner.model.Annotator import Annotator, TrainingParameters
+from bioner.model.bioner_model import BioNER
 from bioner.model.encoder.FasttextEncoder import FasttextEncoder
-from bioner.model.datexis_model import BioNER
+
 
 if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')
@@ -59,9 +60,6 @@ if __name__ == '__main__':
     required_named.add_argument('--enableFasterTraining',
                                 action='store_true',
                                 help='Enable faster training by compute metrics only every 10th epoch')
-    required_named.add_argument('--enableSkipConnection',
-                                action='store_true',
-                                help='Enable Skip Connection')
 
     args = parser.parse_args()
 
@@ -71,13 +69,11 @@ if __name__ == '__main__':
     random.seed(1632737901)
 
     encoder = FasttextEncoder(embeddings_file_path=args.embeddings)
-    model = BioNER(input_vector_size=encoder.get_embeddings_vector_size(),
-                   skip_connection_enabled=args.enableSkipConnection)
+    model = BioNER(input_vector_size=encoder.get_embeddings_vector_size())
     parameters = TrainingParameters(encoder=encoder,
                                     batch_size=args.batchSize,
                                     training_dataset_path=args.training,
                                     validation_dataset_path=args.validation,
-                                    test_dataset_path=args.test,
                                     model_save_path=args.modelOutputFolder,
                                     max_epochs=args.maxEpochs,
                                     num_workers=args.numWorkers,
