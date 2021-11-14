@@ -6,7 +6,7 @@ from torch import optim
 
 from bioner.model.Annotator import TrainingParameters, Annotator
 from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.DATEXISEncoder import DATEXISEncoder
+from bioner.model.encoder.DATEXISEncoder import DATEXISEncoder
 from bioner.model.model_loader import DATEXISNERLayerConfiguration, ModelLoader
 
 

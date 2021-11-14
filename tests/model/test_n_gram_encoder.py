@@ -1,5 +1,5 @@
 from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.NGramEncoder import NGramEncoder, keep_only_printable_chars, TrigramEncoder, Vocabulary, LookupCache
+from bioner.model.encoder.NGramEncoder import NGramEncoder, keep_only_printable_chars, TrigramEncoder, Vocabulary, LookupCache
 
 
 def test_alphabet():

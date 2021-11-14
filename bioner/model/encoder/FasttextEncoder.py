@@ -2,7 +2,7 @@ import fasttext
 
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.EncodedToken import EncodedToken
-from bioner.model.Encoder import Encoder
+from bioner.model.encoder.Encoder import Encoder
 from bioner.model.Token import Token
 
 

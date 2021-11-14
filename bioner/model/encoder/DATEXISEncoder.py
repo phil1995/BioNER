@@ -1,11 +1,10 @@
 import numpy as np
-import torch
 
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.EncodedToken import EncodedToken
-from bioner.model.Encoder import Encoder
-from bioner.model.NGramEncoder import TrigramEncoder
-from bioner.model.PositionEncoder import PositionEncoder
+from bioner.model.encoder.Encoder import Encoder
+from bioner.model.encoder.NGramEncoder import TrigramEncoder
+from bioner.model.encoder.PositionEncoder import PositionEncoder
 from bioner.model.SurfaceEncoder import SurfaceEncoder
 from bioner.model.Token import Token
 

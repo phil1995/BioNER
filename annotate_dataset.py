@@ -5,7 +5,7 @@ import torch
 
 from bioner.model.Annotator import Annotator
 from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.FasttextEncoder import FasttextEncoder
+from bioner.model.encoder.FasttextEncoder import FasttextEncoder
 from bioner.model.model_loader import DATEXISNERStackedBiLSTMLayerConfiguration, ModelLoader
 from dataset_to_conll_file import write_dataset_to_conll_file
 

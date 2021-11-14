@@ -12,10 +12,9 @@ from ignite.utils import setup_logger
 from torch import optim, nn
 
 from bioner.model.BiLSTM import BiLSTM
-from bioner.model.Encoder import Encoder
+from bioner.model.encoder.Encoder import Encoder
 from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
 from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.datexis_model import DATEXISModel
 from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall, \
     _create_BIO2_labels_from_batch_indices
 
