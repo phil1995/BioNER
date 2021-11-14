@@ -1,6 +1,5 @@
 import logging
 from copy import deepcopy
-from os.path import join
 from typing import Optional, Sequence, Dict
 
 import numpy as np
@@ -8,7 +7,7 @@ import torch
 from ignite.contrib.handlers import TensorboardLogger, ProgressBar
 from ignite.engine import Engine, Events, create_supervised_evaluator, State
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
-from ignite.metrics import ConfusionMatrix, Loss, Metric
+from ignite.metrics import Loss, Metric
 from ignite.utils import setup_logger
 from torch import optim, nn
 
@@ -53,13 +52,12 @@ class TrainingParameters:
     def __init__(self, encoder: Encoder, training_dataset_path: str, validation_dataset_path: str,
                  model: nn.Module, model_save_path: str, optimizer: optim,
                  batch_size: int, max_epochs: int, num_workers: int = 0,
-                 test_dataset_path: Optional[str] = None, tensorboard_log_directory_path: Optional[str] = None,
+                 tensorboard_log_directory_path: Optional[str] = None,
                  training_log_file_path: Optional[str] = None,
                  faster_training_evaluation: Optional[bool] = False):
         self.encoder = encoder
         self.training_dataset_path = training_dataset_path
         self.validation_dataset_path = validation_dataset_path
-        self.test_dataset_path = test_dataset_path
         self.model = model
         self.model_save_path = model_save_path
         self.optimizer = optimizer
@@ -69,13 +67,6 @@ class TrainingParameters:
         self.tensorboard_log_directory_path = tensorboard_log_directory_path
         self.training_log_file_path = training_log_file_path
         self.faster_training_evaluation = faster_training_evaluation
-
-
-class TestParameters:
-    def __init__(self, encoder_embeddings_path: str, model_checkpoint_file_path: str, test_dataset_path: str):
-        self.encoder_embeddings_path = encoder_embeddings_path
-        self.model_save_path = model_checkpoint_file_path
-        self.test_dataset_path = test_dataset_path
 
 
 class Annotator:
@@ -186,24 +177,7 @@ class Annotator:
         if tb_logger is not None:
             tb_logger.close()
 
-        # Test
-        if parameters.test_dataset_path is not None:
-            Annotator.test(encoder=encoder, test_dataset_path=parameters.test_dataset_path,
-                           best_model_state_path=join(parameters.model_save_path, checkpoint_handler.last_checkpoint),
-                           num_workers=parameters.num_workers)
         return validation_evaluator.state
-
-    @staticmethod
-    def test(encoder: Encoder, test_dataset_path: str, best_model_state_path: str, num_workers: int = 0):
-        print(f"Start test on: {test_dataset_path}")
-        model = Annotator.create_model(input_vector_size=encoder.get_embeddings_vector_size())
-        model.load_state_dict(torch.load(best_model_state_path))
-        test_dataset = Annotator.load_dataset(path=test_dataset_path, encoder=encoder)
-        test_data_loader = MedMentionsDataLoader(dataset=test_dataset, shuffle=False, num_workers=num_workers,
-                                                 batch_size=1, collate_fn=collate_batch)
-        evaluator = Annotator.create_evaluator(model)
-        state = evaluator.run(test_data_loader)
-        print(state.metrics)
 
     @staticmethod
     def create_evaluator(model):
@@ -235,32 +209,6 @@ class Annotator:
         encoder.encode(dataset)
         print(f"Finished encoding dataset: {path}")
         return dataset
-
-    @staticmethod
-    def create_model(input_vector_size: int, feedforward_layer_size: int = 512, lstm_layer_size: int = 256) -> BiLSTM:
-        """
-
-        :param input_vector_size: the size of the embeddings
-        :param feedforward_layer_size: (DATEXIS: 512)
-        :param lstm_layer_size: (DATEXIS: 256)
-        :return:
-        """
-        model = BiLSTM(input_vector_size=input_vector_size, feedforward_layer_size=feedforward_layer_size,
-                       lstm_layer_size=lstm_layer_size)
-        model.to(device)
-        return model
-
-    @staticmethod
-    def create_original_datexis_ner_model(input_vector_size: int) -> DATEXISModel:
-        """
-
-        Creates the original DATEXIS-NER model from the paper:
-        Robust Named Entity Recognition in Idiosyncratic Domains (https://arxiv.org/abs/1608.06757)
-        :param input_vector_size: the size of the embeddings
-        """
-        model = DATEXISModel(input_vector_size=input_vector_size)
-        model.to(device)
-        return model
 
     @staticmethod
     def add_tensorboard_logger(log_dir: str, trainer: Engine, train_evaluator: Engine,
@@ -317,22 +265,7 @@ class Annotator:
 
     @staticmethod
     def annotate_dataset(dataset: CoNLLDataset, model: nn.Module):
-        all_predicted_labels = []
-        model.to(device)
-        model.eval()
-        with torch.no_grad():
-            data_loader = MedMentionsDataLoader(dataset=dataset, shuffle=False, num_workers=0,
-                                                batch_size=128, collate_fn=collate_batch)
-            for batch in data_loader:
-                x, y, original_lengths = batch
-                y_pred = model(x, original_lengths)
-                predicted_batch_indices = torch.argmax(y_pred, dim=1)
-                predicted_batch_indices = [predicted_indices[:original_lengths[index]] for index, predicted_indices in enumerate(predicted_batch_indices)]
-                predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices,
-                                                                          ignore_index=ignore_label_index)
-
-                for predicted_sentence_labels in predicted_labels:
-                    all_predicted_labels.append(predicted_sentence_labels)
+        all_predicted_labels = Annotator.predict_labels(dataset=dataset, model=model)
         annotated_dataset = deepcopy(dataset)
         i = 0
         for doc_index, document in enumerate(dataset.documents):
@@ -345,3 +278,24 @@ class Annotator:
                     token.tag = label
                 i += 1
         return annotated_dataset
+
+    @staticmethod
+    def predict_labels(dataset: CoNLLDataset, model: nn.Module):
+        all_predicted_labels = []
+        model.to(device)
+        model.eval()
+        with torch.no_grad():
+            data_loader = MedMentionsDataLoader(dataset=dataset, shuffle=False, num_workers=0,
+                                                batch_size=128, collate_fn=collate_batch)
+            for batch in data_loader:
+                x, y, original_lengths = batch
+                y_pred = model(x, original_lengths)
+                predicted_batch_indices = torch.argmax(y_pred, dim=1)
+                predicted_batch_indices = [predicted_indices[:original_lengths[index]] for index, predicted_indices in
+                                           enumerate(predicted_batch_indices)]
+                predicted_labels = _create_BIO2_labels_from_batch_indices(predicted_batch_indices,
+                                                                          ignore_index=ignore_label_index)
+
+                for predicted_sentence_labels in predicted_labels:
+                    all_predicted_labels.append(predicted_sentence_labels)
+        return all_predicted_labels
