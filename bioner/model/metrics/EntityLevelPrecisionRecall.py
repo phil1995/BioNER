@@ -176,7 +176,7 @@ def filtered_labels(gold_standard_labels, predicted_labels):
     Therefore, we exploit that exactly one label is predicted per token and thus truncate the padding
     by using the length of the already filtered gold_standard_label.
     """
-    filtered_predicted_labels = []
-    for index, correct_labels in enumerate(gold_standard_labels):
-        filtered_predicted_labels.append(predicted_labels[index][0: len(correct_labels)])
-    return filtered_predicted_labels
+    return [
+        predicted_labels[index][0: len(correct_labels)]
+        for index, correct_labels in enumerate(gold_standard_labels)
+    ]
