@@ -29,15 +29,15 @@ def test_export_to_csv(tmpdir):
                       '\n',
                       'Text,-1,Eirmod,tempor,.\n',
                       'Gold Standard,-1,B,O,O\n',
-                      'BioNER,0,B,O,O\n',
+                      'BioNER,2,B,O,O\n',
                       '\n',
                       'Text,-1,ut,labore,et\n',
                       'Gold Standard,-1,B,O,O\n',
-                      'BioNER,0,B,O,O\n',
+                      'BioNER,2,B,O,O\n',
                       '\n',
                       'Text,-1,dolore,magna,aliquyam\n',
                       'Gold Standard,-1,O,O,O\n',
-                      'BioNER,0,O,O,O\n',
+                      'BioNER,2,O,O,O\n',
                       '\n',
                       ]
     with open(output_file_path, 'r') as exported_csv:
