@@ -7,7 +7,11 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 class DATEXISModel(Module):
-
+    """
+    The DATEXIS-NER model from the paper:
+    Robust Named Entity Recognition in Idiosyncratic Domains (https://arxiv.org/abs/1608.06757)
+    a (modified) JAVA implementation can be found in the following repository: https://github.com/sebastianarnold/TeXoo
+    """
     def __init__(self,
                  input_vector_size: int,
                  feedforward_layer_size: int = 150,
@@ -60,6 +64,11 @@ class DATEXISModel(Module):
 
 
 class StackedBiLSTMModel(Module):
+    """
+    A modified version of the DATEXIS-NER model with a more flexible architecture.
+    Mainly used for finding the best architecture as it allows to directly change the size of the BiLSTM layer stack.
+    Furthermore, it also has the option to enable batch normalization.
+    """
     def __init__(self,
                  input_vector_size: int,
                  additional_bilstm_layer: int = 1,
@@ -75,7 +84,7 @@ class StackedBiLSTMModel(Module):
             f"Feedforward Layer Size:{feedforward_layer_size} "
             f"LSTM Layer Size:{lstm_layer_size} "
             f"Out Feature Size:{out_features} "
-            f"# Stacked BiLSTMs:{additional_bilstm_layer} "
+            f"BiLSTM Stack Size:{additional_bilstm_layer + 1} "
             f"Dropout prob.:{dropout_probability}")
         if batch_normalization_enabled:
             print("Batch normalization enabled")
