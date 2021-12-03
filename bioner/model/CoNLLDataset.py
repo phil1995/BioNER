@@ -1,9 +1,6 @@
 from __future__ import annotations
 import csv
 import itertools as it
-from typing import Optional
-
-from fasttext.FastText import _FastText
 from torch.utils.data import Dataset
 
 from bioner.model.BIO2Tag import BIO2Tag
@@ -77,9 +74,7 @@ class CoNLLDataset(Dataset):
 
     @staticmethod
     def sentence_separator(row):
-        if len(row) == 0:
-            return True
-        return False
+        return len(row) == 0
 
     @staticmethod
     def create_annotated_token_from_row(row):
@@ -97,9 +92,7 @@ class CoNLLDataset(Dataset):
         flatten = it.chain.from_iterable
         self.sentences = []
         for sentence in flatten(self.documents):
-            tokens = []
-            for token in sentence.tokens:
-                tokens.append(token)
+            tokens = [token for token in sentence.tokens]
             self.sentences.append(tokens)
 
     def __len__(self):
