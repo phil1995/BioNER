@@ -3,11 +3,11 @@ import csv
 import itertools as it
 from torch.utils.data import Dataset
 
-from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.Document import Document
-from bioner.model.EncodedToken import EncodedToken
-from bioner.model.Sentence import Sentence
-from bioner.model.Token import Token
+from bioner.model.bio2tag import BIO2Tag
+from bioner.model.document import Document
+from bioner.model.encoded_token import EncodedToken
+from bioner.model.sentence import Sentence
+from bioner.model.token import Token
 
 
 class CoNLLDataset(Dataset):

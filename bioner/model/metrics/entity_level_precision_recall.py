@@ -4,7 +4,7 @@ import torch
 from ignite.metrics.metric import reinit__is_reduced
 from ignite.metrics.precision import _BasePrecisionRecall
 
-from bioner.model.BIO2Tag import BIO2Tag
+from bioner.model.bio2tag import BIO2Tag
 
 __all__ = ["EntityLevelPrecision", "EntityLevelRecall"]
 

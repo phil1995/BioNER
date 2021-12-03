@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.conll_dataset import CoNLLDataset
 
 
 class Encoder(ABC):

@@ -7,9 +7,9 @@ from typing import Optional
 
 import pandas as pd
 
-from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.metrics.EntityLevelPrecisionRecall import convert_labeled_tokens_to_annotations, count_true_positives
+from bioner.model.bio2tag import BIO2Tag
+from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.metrics.entity_level_precision_recall import convert_labeled_tokens_to_annotations, count_true_positives
 import matplotlib.pyplot as plt
 
 

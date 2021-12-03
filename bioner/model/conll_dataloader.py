@@ -1,6 +1,6 @@
 from torch.utils.data import DataLoader
 
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.conll_dataset import CoNLLDataset
 import random
 
 

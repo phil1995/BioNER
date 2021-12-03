@@ -1,6 +1,6 @@
 import argparse
 
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.conll_dataset import CoNLLDataset
 
 
 def write_dataset_to_conll_file(dataset: CoNLLDataset, annotated_dataset: CoNLLDataset, file_path: str):

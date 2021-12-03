@@ -4,7 +4,7 @@ import regex
 
 import numpy as np
 
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.conll_dataset import CoNLLDataset
 
 
 def keep_only_printable_chars(input: str) -> str:

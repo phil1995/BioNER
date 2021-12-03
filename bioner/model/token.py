@@ -1,6 +1,6 @@
 from typing import Optional
 
-from bioner.model.BIO2Tag import BIO2Tag
+from bioner.model.bio2tag import BIO2Tag
 
 
 class Token:

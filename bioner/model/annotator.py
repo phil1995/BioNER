@@ -11,11 +11,11 @@ from ignite.metrics import Loss, Metric
 from ignite.utils import setup_logger
 from torch import optim, nn
 
-from bioner.model.BiLSTM import BiLSTM
-from bioner.model.encoder.Encoder import Encoder
-from bioner.model.CoNLLDataLoader import CoNLLDataLoader
-from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall, \
+from bioner.model.bilstm import BiLSTM
+from bioner.model.encoder.encoder import Encoder
+from bioner.model.conll_dataloader import CoNLLDataLoader
+from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.metrics.entity_level_precision_recall import EntityLevelPrecision, EntityLevelRecall, \
     _create_BIO2_labels_from_batch_indices
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

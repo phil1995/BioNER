@@ -1,8 +1,8 @@
-from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.Document import Document
-from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.Sentence import Sentence
-from bioner.model.Token import Token
+from bioner.model.bio2tag import BIO2Tag
+from bioner.model.document import Document
+from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.sentence import Sentence
+from bioner.model.token import Token
 import filecmp
 
 

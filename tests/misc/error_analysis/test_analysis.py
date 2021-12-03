@@ -3,9 +3,9 @@ from copy import deepcopy
 
 from bioner.misc.error_analysis.analysis import select_errors, ManualErrorAnalysis, ErrorStatistics, ErrorAnalysis, \
     calc_overlapping_statistics
-from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.metrics.EntityLevelPrecisionRecall import Annotation
+from bioner.model.bio2tag import BIO2Tag
+from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.metrics.entity_level_precision_recall import Annotation
 
 
 def test_export_to_csv(tmpdir):

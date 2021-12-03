@@ -2,8 +2,8 @@ import argparse
 import csv
 from copy import deepcopy
 
-from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.bio2tag import BIO2Tag
+from bioner.model.conll_dataset import CoNLLDataset
 
 
 def read_prediction_tsv_file(path: str):

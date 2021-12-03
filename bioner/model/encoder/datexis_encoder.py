@@ -1,12 +1,12 @@
 import numpy as np
 
-from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.EncodedToken import EncodedToken
-from bioner.model.encoder.Encoder import Encoder
-from bioner.model.encoder.NGramEncoder import TrigramEncoder
-from bioner.model.encoder.PositionEncoder import PositionEncoder
-from bioner.model.encoder.SurfaceEncoder import SurfaceEncoder
-from bioner.model.Token import Token
+from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.encoded_token import EncodedToken
+from bioner.model.encoder.encoder import Encoder
+from bioner.model.encoder.ngram_encoder import TrigramEncoder
+from bioner.model.encoder.position_encoder import PositionEncoder
+from bioner.model.encoder.surface_encoder import SurfaceEncoder
+from bioner.model.token import Token
 
 
 class DATEXISEncoder(Encoder):

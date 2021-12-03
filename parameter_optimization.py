@@ -5,8 +5,8 @@ from os import path, mkdir
 import torch
 from torch import optim
 
-from bioner.model.Annotator import TrainingParameters, Annotator
-from bioner.model.encoder.FasttextEncoder import FasttextEncoder
+from bioner.model.annotator import TrainingParameters, Annotator
+from bioner.model.encoder.fasttext_encoder import FasttextEncoder
 from bioner.model.model_loader import DATEXISNERStackedBiLSTMLayerConfiguration, ModelLoader
 
 lstm_sizes = [20, 256, 512, 1024, 2048, 4096]

@@ -4,8 +4,8 @@ import random
 import torch
 from torch import optim
 
-from bioner.model.Annotator import Annotator, TrainingParameters
-from bioner.model.encoder.FasttextEncoder import FasttextEncoder
+from bioner.model.annotator import Annotator, TrainingParameters
+from bioner.model.encoder.fasttext_encoder import FasttextEncoder
 from bioner.model.model_loader import ModelLoader, LayerConfigurationCreator
 
 if __name__ == '__main__':

@@ -3,10 +3,10 @@ import os
 
 import torch
 
-from bioner.model.Annotator import Annotator
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.annotator import Annotator
+from bioner.model.conll_dataset import CoNLLDataset
 from bioner.model.bioner_model import BioNER
-from bioner.model.encoder.FasttextEncoder import FasttextEncoder
+from bioner.model.encoder.fasttext_encoder import FasttextEncoder
 from dataset_to_conll_file import write_dataset_to_conll_file
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

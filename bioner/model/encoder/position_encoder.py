@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from bioner.model.CoNLLDataset import CoNLLDataset
+from bioner.model.conll_dataset import CoNLLDataset
 
 
 class PositionEncoder:

@@ -6,10 +6,10 @@ from allennlp.data.tokenizers import WhitespaceTokenizer
 from allennlp.predictors.predictor import Predictor
 from allennlp.data.tokenizers.word_splitter import JustSpacesWordSplitter
 
-from bioner.model.BIO2Tag import BIO2Tag
-from bioner.model.CoNLLDataset import CoNLLDataset
-from bioner.model.Token import Token
-from bioner.model.metrics.EntityLevelPrecisionRecall import convert_labeled_tokens_to_annotations, count_true_positives
+from bioner.model.bio2tag import BIO2Tag
+from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.token import Token
+from bioner.model.metrics.entity_level_precision_recall import convert_labeled_tokens_to_annotations, count_true_positives
 
 from sklearn.metrics import precision_recall_fscore_support
 
