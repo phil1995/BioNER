@@ -4,8 +4,8 @@ from bioner.model.CoNLLDataset import CoNLLDataset
 import random
 
 
-class MedMentionsDataLoader(DataLoader):
-    """Custom DataLoader which supports shuffling the MedMentions dataset at the document level"""
+class CoNLLDataLoader(DataLoader):
+    """Custom DataLoader which supports shuffling the CoNLL dataset at the document level"""
     def __init__(self, dataset: CoNLLDataset, batch_size: int, shuffle: bool, num_workers: int, collate_fn=None):
         if shuffle:
             random.shuffle(dataset.documents)

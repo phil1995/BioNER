@@ -13,7 +13,7 @@ from torch import optim, nn
 
 from bioner.model.BiLSTM import BiLSTM
 from bioner.model.encoder.Encoder import Encoder
-from bioner.model.MedMentionsDataLoader import MedMentionsDataLoader
+from bioner.model.CoNLLDataLoader import CoNLLDataLoader
 from bioner.model.CoNLLDataset import CoNLLDataset
 from bioner.model.metrics.EntityLevelPrecisionRecall import EntityLevelPrecision, EntityLevelRecall, \
     _create_BIO2_labels_from_batch_indices
@@ -77,18 +77,18 @@ class Annotator:
         model = parameters.model
         model = model.to(device)
         training_dataset = Annotator.load_dataset(path=parameters.training_dataset_path, encoder=encoder)
-        training_data_loader = MedMentionsDataLoader(dataset=training_dataset, shuffle=True,
-                                                     num_workers=parameters.num_workers,
-                                                     batch_size=parameters.batch_size, collate_fn=collate_batch)
+        training_data_loader = CoNLLDataLoader(dataset=training_dataset, shuffle=True,
+                                               num_workers=parameters.num_workers,
+                                               batch_size=parameters.batch_size, collate_fn=collate_batch)
 
         criterion = nn.CrossEntropyLoss(ignore_index=ignore_label_index)
 
         trainer = Annotator.create_trainer(model=model, optimizer=parameters.optimizer, criterion=criterion)
 
         validation_dataset = Annotator.load_dataset(path=parameters.validation_dataset_path, encoder=encoder)
-        validation_data_loader = MedMentionsDataLoader(dataset=validation_dataset, shuffle=True,
-                                                       num_workers=parameters.num_workers,
-                                                       batch_size=parameters.batch_size, collate_fn=collate_batch)
+        validation_data_loader = CoNLLDataLoader(dataset=validation_dataset, shuffle=True,
+                                                 num_workers=parameters.num_workers,
+                                                 batch_size=parameters.batch_size, collate_fn=collate_batch)
         precision = EntityLevelPrecision()
         recall = EntityLevelRecall()
 
@@ -284,8 +284,8 @@ class Annotator:
         model.to(device)
         model.eval()
         with torch.no_grad():
-            data_loader = MedMentionsDataLoader(dataset=dataset, shuffle=False, num_workers=0,
-                                                batch_size=128, collate_fn=collate_batch)
+            data_loader = CoNLLDataLoader(dataset=dataset, shuffle=False, num_workers=0,
+                                          batch_size=128, collate_fn=collate_batch)
             for batch in data_loader:
                 x, y, original_lengths = batch
                 y_pred = model(x, original_lengths)
