@@ -6,6 +6,13 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 
 class BioNER(Module):
+    """
+    The BioNER model as proposed in BioNER: Named Entity Recognition in the Biomedical Domain
+
+    It has a feed-forward layer of size 2048, a stack of three BiLSTM layers each of size 1024 and a LSTM decoder layer
+    also of the size 1024. Before each (Bi-)LSTM layer is an dropout layer with the dropout probability of 80%.
+    BioNER predicts the most likely label for each token via softmax.
+    """
     def __init__(self,
                  input_vector_size: int,
                  feedforward_layer_size: int = 2048,
@@ -27,6 +34,12 @@ class BioNER(Module):
         self.init_weights()
 
     def init_weights(self):
+        """
+        Initialize the weights in the same way as Arnold et al. initialized the weights for the (modified) version of
+        DATEXIS-NER in: https://github.com/sebastianarnold/TeXoo/blob/514860d96decdf3ff6613dfcf0d27d9845ddcf60/texoo
+        -entity-recognition/src/main/java/de/datexis/ner/tagger/MentionTagger.java#L86-L136 :return:
+        """
+
         BioNER.relu(self.ff1)
         self.xavier_normal(self.biLSTM)
         for additional_biLSTM_layer in self.additional_biLSTM_layers:
@@ -78,7 +91,3 @@ class BioNER(Module):
         x, _ = pad_packed_sequence(sequence, batch_first=True)
         x = self.dropout(x)
         return pack_padded_sequence(x, lengths.cpu(), batch_first=True, enforce_sorted=False)
-
-    @staticmethod
-    def relu(tensor: Linear) -> Tensor:
-        init.normal_(tensor.weight, std=math.sqrt(2.0 / tensor.in_features))
