@@ -1,11 +1,9 @@
 import regex
-
 import numpy as np
-import torch
 
 
 class SurfaceEncoder:
-    #https://github.com/sebastianarnold/TeXoo/blob/514860d96decdf3ff6613dfcf0d27d9845ddcf60/texoo-core/src/main/java/de/datexis/encoder/impl/SurfaceEncoder.java#L25
+    # https://github.com/sebastianarnold/TeXoo/blob/514860d96decdf3ff6613dfcf0d27d9845ddcf60/texoo-core/src/main/java/de/datexis/encoder/impl/SurfaceEncoder.java#L25
 
     @staticmethod
     def get_embedding_vector_size() -> int:
@@ -100,4 +98,3 @@ class SurfaceEncoder:
             return False
         token = token[-1]
         return token == regex.sub('[^\\p{P}]', '', token)
-

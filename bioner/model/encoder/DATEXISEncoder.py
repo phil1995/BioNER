@@ -5,7 +5,7 @@ from bioner.model.EncodedToken import EncodedToken
 from bioner.model.encoder.Encoder import Encoder
 from bioner.model.encoder.NGramEncoder import TrigramEncoder
 from bioner.model.encoder.PositionEncoder import PositionEncoder
-from bioner.model.SurfaceEncoder import SurfaceEncoder
+from bioner.model.encoder.SurfaceEncoder import SurfaceEncoder
 from bioner.model.Token import Token
 
 
