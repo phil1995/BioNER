@@ -6,8 +6,7 @@ from torch import optim
 
 from bioner.model.annotator import Annotator, TrainingParameters
 from bioner.model.bioner_model import BioNER
-from bioner.model.encoder.fasttext_encoder import FasttextEncoder
-
+from bioner.model.encoder.fasttext_encoder import FasttextEncoder, FastTextEmbedding
 
 if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')
@@ -16,7 +15,11 @@ if __name__ == '__main__':
     required_named.add_argument('--embeddings',
                                 type=str,
                                 help='Path to the embeddings file',
-                                required=True)
+                                required=False)
+    required_named.add_argument('--embeddingsRoot',
+                                type=str,
+                                help='Path where the embeddings can be downloaded to',
+                                required=False)
     required_named.add_argument('--training',
                                 type=str,
                                 help='Path to the training dataset file',
@@ -68,7 +71,17 @@ if __name__ == '__main__':
     torch.manual_seed(1632737901)
     random.seed(1632737901)
 
-    encoder = FasttextEncoder(embeddings_file_path=args.embeddings)
+    if args.embeddings is None and args.embeddingsRoot is None:
+        parser.error("You need to set either --embeddings or --embeddingsRoot")
+
+    embeddings_file_path = None
+    if args.embeddings is None:
+        fasttext_embedding = FastTextEmbedding(embeddings_root=args.embeddingsRoot, ngram_range="3-4")
+        embeddings_file_path = fasttext_embedding.filepath
+    else:
+        embeddings_file_path = args.embeddings
+
+    encoder = FasttextEncoder(embeddings_file_path=embeddings_file_path)
     model = BioNER(input_vector_size=encoder.get_embeddings_vector_size())
     parameters = TrainingParameters(encoder=encoder,
                                     batch_size=args.batchSize,

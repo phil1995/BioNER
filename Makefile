@@ -28,9 +28,25 @@ mkfile_dir := $(dir $(mkfile_path))
 main_path := $(mkfile_dir)main.py
 datexis_path := $(mkfile_dir)datexis.py
 parameter_optim_path := $(mkfile_dir)parameter_optimization.py
-bioner_path := $(mkfile_dir)bioner.py
+bioner_path := $(mkfile_dir)train_bioner.py
 
 train-bioner:
+	# Pass the ngrams parameter, e.g. make train-bioner ngrams=3-4
+	mkdir -p $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
+	$(python_path) $(bioner_path) \
+	--embeddingsRoot $(fasttext_embeddings_directory) \
+	--training $(training_dataset) \
+	--validation $(validation_dataset) \
+	--modelOutputFolder $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/ \
+	--batchSize $(batch_size) \
+	--maxEpochs $(max_epochs) \
+	--numWorkers $(num_workers) \
+	--learningRate $(learning_rate) \
+	--trainingsLogFile $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
+	--tensorboardLogDirectory $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
+	$(args)
+
+train-custom-bioner:
 	# Pass the ngrams parameter, e.g. make train-bioner ngrams=3-4
 	mkdir -p $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
 	$(python_path) $(bioner_path) \
