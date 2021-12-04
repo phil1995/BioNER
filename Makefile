@@ -2,17 +2,24 @@ training_dataset :=
 validation_dataset :=
 test_dataset :=
 
+# Path to venv/bin/python or set to python
 python_path :=
 
+# Directory were we create the folders for the models - should include a trailing slash
 model_output_directory :=
 
-batch_size := 1
-learning_rate := 0.001
-max_epochs := 30
+# Fasttext embeddings directory - should include a trailing slash
+fasttext_embeddings_directory :=
+
+batch_size := 64
+learning_rate := 0.0005
+# Max. epochs a model gets trained - all models get trained via early stopping with a 10 epoch threshold
+max_epochs := 300
 num_workers := 0
 
-# Fasttext embeddings directory
-fasttext_embeddings_directory := 
+additional_bilstm_layers := 1
+
+# Below are internal variables - do not change
 
 # Get the full path of the Makefile to set the main path automatically
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -22,8 +29,6 @@ main_path := $(mkfile_dir)main.py
 datexis_path := $(mkfile_dir)datexis.py
 parameter_optim_path := $(mkfile_dir)parameter_optimization.py
 bioner_path := $(mkfile_dir)bioner.py
-
-additional_bilstm_layers := 1
 
 train-bioner:
 	# Pass the ngrams parameter, e.g. make train-bioner ngrams=3-4
@@ -39,23 +44,6 @@ train-bioner:
 	--learningRate $(learning_rate) \
 	--trainingsLogFile $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
 	--tensorboardLogDirectory $(model_output_directory)BioNER/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	$(args)
-
-train-bioner-skip-con:
-	# Pass the ngrams parameter, e.g. make train-bioner-skip-con ngrams=3-4
-	mkdir -p $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs  && \
-	$(python_path) $(bioner_path) \
-	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
-	--training $(training_dataset) \
-	--validation $(validation_dataset) \
-	--modelOutputFolder $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/ \
-	--batchSize $(batch_size) \
-	--maxEpochs $(max_epochs) \
-	--numWorkers $(num_workers) \
-	--learningRate $(learning_rate) \
-	--trainingsLogFile $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/training.log \
-	--tensorboardLogDirectory $(model_output_directory)BioNER-skip-con/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)/tensorboard_logs \
-	--enableSkipConnection \
 	$(args)
 
 train-datexis-ner:
@@ -170,7 +158,7 @@ train-all-custom-DATEXIS:
 	$(MAKE) train-custom-DATEXIS ngrams=6-6 ff=$(ff) lstm=$(lstm)
 
 train-custom-DATEXIS:
-	# Pass the ngrams parameter, e.g. make train ngrams=3-6
+	# Pass the ngrams parameter, e.g. make train-custom-DATEXIS ngrams=3-6
 	mkdir -p $(model_output_directory)original_DATEXIS_NER_ADAM/$(ngrams)ngrams/batch_size=$(batch_size)_lr=$(learning_rate)_ff_size=$(ff)_lstm_size=$(lstm)/tensorboard_logs  && \
 	$(python_path) $(main_path) \
 	--embeddings $(fasttext_embeddings_directory)pubmed.fasttext.$(ngrams)ngrams.neg5.1e-5_subs.bin \
