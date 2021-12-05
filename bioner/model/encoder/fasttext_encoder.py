@@ -62,10 +62,10 @@ class FastTextEmbedding:
     @staticmethod
     def get_url_for_ngram_range(ngram_range: str) -> str:
         if ngram_range == "3-4":
-            # Fallback Address (slower): "https://siasky.net/nACvdmBnYm86RAGGvsJLCaIDM2wCDoZK9Yy9_lLp9phgXA"
+            # Fallback Address (slower): https://siasky.net/nACvdmBnYm86RAGGvsJLCaIDM2wCDoZK9Yy9_lLp9phgXA
             return "https://link.eu1.storjshare.io/jwsdq7ymfcnyxnqacofyckxjvyva/bioner%2Fpubmed.fasttext.3-4ngrams.neg5.1e-5_subs.bin?download"
         if ngram_range == "3-6":
-            # Fallback Address (slower):
+            # Fallback Address (slower): https://siasky.net/nABUQPit8DTupo4eqidWdWIC9cozk14PiP8eIw2yYNB-BA
             return "https://link.eu1.storjshare.io/jxuer75wl52ijimisfsmwy46lpra/bioner%2Fpubmed.fasttext.3-6ngrams.neg5.1e-5_subs.bin?download"
         else:
             raise FastTextEmbeddingNotFoundException()
