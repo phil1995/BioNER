@@ -1,4 +1,3 @@
-import unittest
 from copy import deepcopy
 
 from bioner.misc.error_analysis.analysis import select_errors, ManualErrorAnalysis, ErrorStatistics, ErrorAnalysis, \
