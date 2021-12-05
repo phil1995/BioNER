@@ -100,7 +100,6 @@ if __name__ == '__main__':
                                     batch_size=args.batchSize,
                                     training_dataset_path=args.training,
                                     validation_dataset_path=args.validation,
-                                    test_dataset_path=args.test,
                                     model_save_path=args.modelOutputFolder,
                                     max_epochs=args.maxEpochs,
                                     num_workers=args.numWorkers,

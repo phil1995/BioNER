@@ -113,7 +113,7 @@ class SciBERTNER:
         return annotated_dataset
 
     def annotate_to_file(self, dataset_file_path: str, output_file_path: str):
-        dataset = CoNLLDataset(data_file_path=dataset_file_path, encoder=None)
+        dataset = CoNLLDataset(data_file_path=dataset_file_path)
         annotated_dataset = self.annotate(dataset=dataset)
         CoNLLDataset.write_dataset_to_file(dataset=annotated_dataset, file_path=output_file_path)
 
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     parser.add_argument("--outputFilePath")
     args = parser.parse_args()
     evaluator = SciBERTNER(contextual_ner_path=args.contextualNERPath)
-    evaluation_dataset = CoNLLDataset(data_file_path=args.evaluationDatasetPath, encoder=None)
+    evaluation_dataset = CoNLLDataset(data_file_path=args.evaluationDatasetPath)
     if args.outputFilePath:
         evaluator.annotate_to_file(dataset_file_path=args.evaluationDatasetPath,
                                    output_file_path=args.outputFilePath)
