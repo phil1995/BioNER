@@ -1,4 +1,7 @@
 # BioNER
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/df563aa0aa3f49a19e7c8f09df13ae20)](https://app.codacy.com/gh/phil1995/BioNER?utm_source=github.com&utm_medium=referral&utm_content=phil1995/BioNER&utm_campaign=Badge_Grade_Settings)
+
 This repository contains the code for BioNER, an LSTM-based model designed for biomedical named entity recognition (NER).
 
 ## Download
