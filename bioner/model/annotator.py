@@ -179,20 +179,6 @@ class Annotator:
         return validation_evaluator.state
 
     @staticmethod
-    def create_evaluator(model):
-        precision = EntityLevelPrecision()
-        recall = EntityLevelRecall()
-        f1 = (precision * recall * 2 / (precision + recall + 1e-20)).mean()
-        evaluator = create_supervised_evaluator(model,
-                                                metrics={"Precision": precision,
-                                                         "Recall": recall,
-                                                         "F1": f1
-                                                         },
-                                                device=device)
-
-        return evaluator
-
-    @staticmethod
     def log_results(epoch: int, state: State, logger: logging.Logger):
         logger.info(f"Training-Epoch:{epoch} | Evaluation Results | Precision:{state.metrics['Precision']},"
                     f" Recall:{state.metrics['Recall']}, F1:{state.metrics['F1']}")
