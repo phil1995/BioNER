@@ -2,7 +2,6 @@ import argparse
 from copy import deepcopy
 
 import numpy as np
-from allennlp.data.tokenizers import WhitespaceTokenizer
 from allennlp.predictors.predictor import Predictor
 from allennlp.data.tokenizers.word_splitter import JustSpacesWordSplitter
 
@@ -23,7 +22,7 @@ class SciBERTNER:
         self.contextual_ner = Predictor.from_path(contextual_ner_path, cuda_device=0)
 
         # switch-off tokenizer (expect pretokenized, space-separated strings)
-        self.contextual_ner._tokenizer = WhitespaceTokenizer()
+        self.contextual_ner._tokenizer = JustSpacesWordSplitter()
 
         # load labels (to use logits, wip)
         self.contextual_ner_labels = []
