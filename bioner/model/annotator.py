@@ -151,7 +151,7 @@ class Annotator:
         validation_evaluator.add_event_handler(Events.COMPLETED, checkpoint_handler)
 
         # Add Logger
-        trainer.logger = setup_logger("Trainer", filepath=parameters.training_log_file_path)
+        trainer.logger = setup_logger("Trainer", filepath=parameters.training_log_file_path, reset=True)
         train_evaluator.logger = setup_logger("Train Evaluator", filepath=parameters.training_log_file_path)
         validation_evaluator.logger = setup_logger("Validation Evaluator", filepath=parameters.training_log_file_path)
 
