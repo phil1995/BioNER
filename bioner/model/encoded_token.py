@@ -4,7 +4,7 @@ from bioner.model.token import Token
 
 
 class EncodedToken(Token):
-    def __init__(self, encoding, text: str, start: int, end: int, tag: Optional[BIO2Tag]):
+    def __init__(self, encoding, text: str, start: str, end: str, tag: Optional[BIO2Tag]):
         self.encoding = encoding
         super().__init__(text=text, start=start, end=end, tag=tag)
 
