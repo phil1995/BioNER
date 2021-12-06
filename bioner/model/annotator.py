@@ -11,7 +11,6 @@ from ignite.metrics import Loss, Metric
 from ignite.utils import setup_logger
 from torch import optim, nn
 
-from bioner.model.bilstm import BiLSTM
 from bioner.model.conll_dataloader import CoNLLDataLoader
 from bioner.model.conll_dataset import CoNLLDataset
 from bioner.model.encoder.encoder import Encoder
@@ -229,7 +228,7 @@ class Annotator:
         return Engine(padding_train_step)
 
     @staticmethod
-    def create_evaluator(model: BiLSTM, metrics: Dict[str, Metric]):
+    def create_evaluator(model: nn.Module, metrics: Dict[str, Metric]):
         def padding_evaluation_step(engine: Engine, batch: Sequence[torch.Tensor]):
             model.eval()
             with torch.no_grad():
