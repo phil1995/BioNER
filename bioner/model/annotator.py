@@ -5,16 +5,16 @@ from typing import Optional, Sequence, Dict
 import numpy as np
 import torch
 from ignite.contrib.handlers import TensorboardLogger, ProgressBar
-from ignite.engine import Engine, Events, create_supervised_evaluator, State
+from ignite.engine import Engine, Events, State
 from ignite.handlers import EarlyStopping, Checkpoint, DiskSaver, global_step_from_engine
 from ignite.metrics import Loss, Metric
 from ignite.utils import setup_logger
 from torch import optim, nn
 
 from bioner.model.bilstm import BiLSTM
-from bioner.model.encoder.encoder import Encoder
 from bioner.model.conll_dataloader import CoNLLDataLoader
 from bioner.model.conll_dataset import CoNLLDataset
+from bioner.model.encoder.encoder import Encoder
 from bioner.model.metrics.entity_level_precision_recall import EntityLevelPrecision, EntityLevelRecall, \
     _create_BIO2_labels_from_batch_indices
 
