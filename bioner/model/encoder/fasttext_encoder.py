@@ -40,8 +40,6 @@ class FastTextEmbedding:
             self._urlretrieve(url)
 
     def _urlretrieve(self, url: str, chunk_size: int = 1024) -> None:
-        # taken from:
-        # https://github.com/pytorch/vision/blob/dcf5dc8747b94f70d1a3f1557df440fb567af95d/torchvision/datasets/utils.py#L30-L38
         with open(self.filepath, "wb") as file:
             with requests.get(url, stream=True) as response:
                 response.raise_for_status()
