@@ -52,4 +52,4 @@ python annotate_dataset.py \
 --outputFile \ # path to the output file for storing the annotated dataset
 --model # path to the trained BioNER model
 ```
-Furthermore, you can add the flag `--enableExportCoNLL` to export an additional file at the same location at the same parent folder as the `outputFile`, which can be used for the evaluation with the original `conlleval.pl` script.
+Furthermore, you can add the flag `--enableExportCoNLL` to export an additional file at the same location at the same parent folder as the `outputFile`, which can be used for the evaluation with the original `conlleval.pl` perl script ([source](https://www.clips.uantwerpen.be/conll2003/ner/)).
